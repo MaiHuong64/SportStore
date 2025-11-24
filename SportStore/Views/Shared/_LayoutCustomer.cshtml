@@ -21,10 +21,10 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Trang chủ</a>
+                        <a class="nav-link" asp-action="index">Trang chủ</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#products">Sản phẩm</a>
+                        <a class="nav-link" asp-action="index">Sản phẩm</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#categories">Danh mục</a>
@@ -38,9 +38,10 @@
                 </ul>
                 
                 <a asp-controller="Accounts" asp-action="Login" class="btn btn-outline-light"><i class="bi bi-person"></i> Đăng nhập</a>&nbsp;
-                <button class="btn btn-cart">
-                    <i class="bi bi-cart3"></i> Giỏ hàng <span class="badge bg-danger">3</span>
-                </button>
+                <a asp-controller="Customers" asp-action="ViewCart" class="nav-link">
+                    <i class="bi bi-cart3"></i> Giỏ hàng
+                </a>
+
             </div>
         </div>
     </nav>

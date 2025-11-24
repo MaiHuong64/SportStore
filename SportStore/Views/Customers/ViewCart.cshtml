@@ -1,0 +1,58 @@
+﻿@model List<SportStore.Models.CartItem>
+
+<h3>Giỏ hàng của bạn</h3>s
+@if (Model.Count > 0)
+{
+	int stt = 0;
+	decimal tongtien = 0;
+
+	 <table class="table">
+        <tr>
+            <th>STT</th>
+            <th>Sản phẩm</th>
+            <th>Giá</th>
+            <th>Số lượng</th>
+            <th>Thành tiền</th>
+            <th></th>
+        </tr>
+
+        @foreach(var item in Model)
+        {
+            var detail = item.product.ProductDetails.FirstOrDefault();
+            var giaBan = detail?.Price ?? 0; 
+            var thanhtien = giaBan * item.quantity;
+            tongtien += thanhtien;
+
+            <tr class="align-middle">
+                <td>@stt++</td>
+                <td>
+                    <img src="~/images/@item.product.Img" width="50" />
+                    @item.product.FullName;
+                </td>
+                <td>@detail.Price.ToString("N0") VNĐ</td>
+                <td>
+                    <form asp-action="UpdateItem" method="post" class="d-flex">
+                        <input type="hidden" name="id" value="@item.product.ProductId" />
+                        <input type="number" name="quantity" value="@item.quantity" class="form-control me-2" />
+                        <input type="submit" class="btn btn-warning" value="Cập nhật" />
+                    </form>
+                </td>
+                <td>@thanhtien.ToString("N0") VNĐ</td>
+                <td>
+                    <form asp-action="RemoveItem" method="post">
+                        <input type="hidden" name="id" value="@item.product.ProductId" />
+                        <input type="submit" class="btn btn-danger" value="Xóa" />
+                    </form>
+                </td>
+            </tr>
+        }
+        <tr>
+            <td colspan="4" class="text-end"><strong>Tổng tiền:</strong></td>
+            <td colspan="2"><strong>@tongtien.ToString("N0") đ</strong></td>
+        </tr>
+    </table>
+}
+else
+{
+    <p>Không có sản phẩm trong giỏ hàng</p>
+}
