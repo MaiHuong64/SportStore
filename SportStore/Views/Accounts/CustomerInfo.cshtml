@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Hồ sơ khách hàng";
+}
+
+@if (ViewBag.Kh != null)
+{
+    <p>Xin chào: @ViewBag.Kh.FullName</p>
+}
+else if (ViewBag.Error != null)
+{
+    <p class="text-danger">@ViewBag.Error</p>
+}
