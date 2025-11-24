@@ -1,0 +1,35 @@
+﻿@model IEnumerable<SportStore.Models.Product>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<section id="products" class="py-5 bg-light">
+    <div class="container">
+            <div class="row g-4">
+            @foreach (var item in Model)
+            {
+                var detail = item.ProductDetails.FirstOrDefault();
+                <div class="col-md-3">
+                    <div class="card product-card">
+                        <div class="product-img-wrapper">
+                            <span class="product-badge">-30%</span>
+                            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500" class="product-img" alt="Nike Shoes">
+                        </div>
+                        <div class="card-body">
+                            <h6 class="product-title">@item.FullName</h6>
+
+                            <div class="product-price">@detail.Price.ToString("N0") VNĐ</div>
+                            <button class="btn btn-add-cart">
+                                <i class="bi bi-cart-plus" asp-controller="Customers" asp-action="AddtoCart"></i> Thêm vào giỏ
+                            </button>
+                            
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>

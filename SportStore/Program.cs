@@ -14,10 +14,13 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.Cookie.Name = "ABC";
+    options.IdleTimeout = TimeSpan.FromSeconds(30);
+});
 builder.Services.AddSingleton<IPasswordHasher<Account>, PasswordHasher<Account>>();
-
-builder.Services.AddSession();
 
 var app = builder.Build();
 

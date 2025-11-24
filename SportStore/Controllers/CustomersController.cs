@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using SportStore.Data;
 using SportStore.Models;
 
@@ -19,6 +20,54 @@ namespace SportStore.Controllers
             _context = context;
         }
 
+        List<CartItem> GetCartItems()
+        {
+            var session = HttpContext.Session;
+            string jsoncart = session.GetString("shopcart");
+            if (jsoncart != null)
+            {
+                var cartItems = JsonConvert.DeserializeObject<List<CartItem>>(jsoncart);
+                return cartItems ?? new List<CartItem> { };
+            }
+            return new List<CartItem>();
+        }
+        void SaveCartSession(List<CartItem> list)
+        {
+            var session = HttpContext.Session;
+            string jsoncart = JsonConvert.SerializeObject(list);
+            session.SetString("shopcart", jsoncart);
+        }
+        // Xóa session giỏ hàng
+        void ClearCart()
+        {
+            var session = HttpContext.Session;
+            session.Remove("shopcart");
+        }
+
+        public async Task<IActionResult> AddCart(int id)
+        {
+            var p = await _context.Products.Include(a => a.ProductDetails).FirstOrDefaultAsync(p => p.ProductId == id);
+            if (p == null) {
+                return NotFound("Sản phẩm không tồn tại");
+            }
+            var cart = GetCartItems();
+            var item = cart.Find(p => p.product.ProductId == id);
+            if (item != null)
+            {
+                item.quantity++;
+            }
+            else
+            {
+                cart.Add(new CartItem() { product = p, quantity = 1 });
+            }
+            SaveCartSession(cart);
+            return RedirectToAction(nameof(ViewCart));
+        }
+
+        public IActionResult ViewCart()
+        {
+            return View(GetCartItems());
+        }
         // GET: Customers
         public async Task<IActionResult> Index()
         {
