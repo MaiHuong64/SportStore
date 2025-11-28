@@ -22,10 +22,10 @@
                             <h6 class="product-title">@item.FullName</h6>
 
                             <div class="product-price">@detail.Price.ToString("N0") VNĐ</div>
-                            <button class="btn btn-add-cart">
-                                <i class="bi bi-cart-plus" asp-controller="Customers" asp-action="AddtoCart"></i> Thêm vào giỏ
-                            </button>
-                            
+                            <a class="btn btn-primary" asp-controller="Customers" asp-action="AddToCart" asp-route-id="@detail.ProductDetailId">
+                                <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                            </a>
+
                         </div>
                     </div>
                 </div>

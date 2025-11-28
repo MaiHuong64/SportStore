@@ -21,10 +21,10 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item">
-                        <a class="nav-link" asp-action="index">Trang chủ</a>
+                        <a class="nav-link" href="#">Trang chủ</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-action="index">Sản phẩm</a>
+                        <a class="nav-link" href="#prodcut">Sản phẩm</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#categories">Danh mục</a>
@@ -37,15 +37,63 @@
                     </li>
                 </ul>
                 
-                <a asp-controller="Accounts" asp-action="Login" class="btn btn-outline-light"><i class="bi bi-person"></i> Đăng nhập</a>&nbsp;
-                <a asp-controller="Customers" asp-action="ViewCart" class="nav-link">
-                    <i class="bi bi-cart3"></i> Giỏ hàng
-                </a>
+                <div class="d-flex">
+                    <div class="d-flex align-items-center">
+                        
+                        <a asp-controller="Customers" asp-action="ViewCart" class="nav-link me-3">
+                            <i class="bi bi-cart3"></i> Giỏ hàng
+                            <span class="badge bg-danger text-white ms-1 rounded-pill">
+                                @{
+                                    var cartJson = Context.Session.GetString("shopcart");
+                                    var cartCount = 0;
+                                    if (!string.IsNullOrEmpty(cartJson))
+                                    {
+                                        var cart = Newtonsoft.Json.JsonConvert.DeserializeObject<List<dynamic>>(cartJson);
+                                        cartCount = cart?.Count ?? 0;
+                                    }
+                                }
+                                @cartCount
+                            </span>
+                        </a>
+
+                        @if (Context.Session.GetString("FullName") != null)
+                        {
+                            <div class="dropdown">
+                                <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle"></i> @Context.Session.GetString("FullName")
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Accounts" asp-action="CustomerInfo">
+                                            <i class="bi bi-person"></i> Thông tin tài khoản
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Orders" asp-action="MyOrders">
+                                            <i class="bi bi-box-seam"></i> Đơn hàng của tôi
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" asp-controller="Accounts" asp-action="Logout">
+                                            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <a asp-controller="Accounts" asp-action="Login" class="btn btn-outline-light">
+                                <i class="bi bi-person"></i> Đăng nhập
+                            </a>
+                        }
+                </div>
 
             </div>
         </div>
     </nav>
-    <!-- Featured Products -->
+
     <section id="products" class="py-5 bg-light">
         <div class="container">
             @RenderBody();

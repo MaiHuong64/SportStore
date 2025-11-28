@@ -58,16 +58,13 @@ namespace SportStore.Controllers
                 EmployeeId = null,
                 Role = "Khách hàng",
                 Status = 1,
-
                 PhoneNumber = sodienthoai,
-                Password = _passwordHasher.HashPassword(new Account(), matkhau),
                 CustomerId = customer.CustomerId,
             };
-            if (ModelState.IsValid)
-            {
-                _context.Accounts.Add(account);
-                await _context.SaveChangesAsync();
-            }
+            account.Password = _passwordHasher.HashPassword(new Account(), matkhau);
+            _context.Accounts.Add(account);
+            await _context.SaveChangesAsync();
+            
             return RedirectToAction(nameof(Login));
         }
         public IActionResult Login()
@@ -103,11 +100,8 @@ namespace SportStore.Controllers
             {
                 HttpContext.Session.SetInt32("CustomerID", (int)acc.CustomerId);
                 HttpContext.Session.SetString("FullName", acc.Customer.FullName);
-                return RedirectToAction(nameof(CustomerInfo));
+                return RedirectToAction("Index","Main");
             }
-
-
-            //return RedirectToAction(nameof(CustomerInfo));
         }
 
 
@@ -116,7 +110,6 @@ namespace SportStore.Controllers
             GetData();
             var customerId = HttpContext.Session.GetInt32("CustomerID");
             var fullName = HttpContext.Session.GetString("FullName");
-            ViewBag.Debug = $"CustomerID: {customerId}, FullName: {fullName}";
             return View();
         }
 
@@ -209,12 +202,19 @@ namespace SportStore.Controllers
             {
                 return NotFound();
             }
-
+            var existAccount = await _context.Accounts.FindAsync(id);
+        
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(account);
+                    existAccount.PhoneNumber = account.PhoneNumber;
+                    existAccount.Password = _passwordHasher.HashPassword(existAccount, account.Password);
+                    existAccount.Role = account.Role;
+                    existAccount.Status = account.Status;
+                    existAccount.CustomerId = account.CustomerId;
+                    existAccount.EmployeeId = account.EmployeeId;
+                    _context.Update(existAccount);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
