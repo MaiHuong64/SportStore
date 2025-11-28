@@ -23,11 +23,7 @@
                 <input asp-for="InvoiceDate" class="form-control" />
                 <span asp-validation-for="InvoiceDate" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="InvoiceType" class="control-label"></label>
-                <input asp-for="InvoiceType" class="form-control" />
-                <span asp-validation-for="InvoiceType" class="text-danger"></span>
-            </div>
+           
             <div class="form-group">
                 <label asp-for="CustomerId" class="control-label"></label>
                 <select asp-for="CustomerId" class="form-control" asp-items="ViewBag.CustomerId"></select>

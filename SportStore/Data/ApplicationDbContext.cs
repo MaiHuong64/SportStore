@@ -65,12 +65,12 @@ public partial class ApplicationDbContext : IdentityDbContext
             entity.HasOne(d => d.Employee).WithMany(p => p.Accounts).HasConstraintName("FK_Account_Employee");
         });
 
-        modelBuilder.Entity<AspNetRole>(entity =>
-        {
-            entity.HasIndex(e => e.NormalizedName, "RoleNameIndex")
-                .IsUnique()
-                .HasFilter("([NormalizedName] IS NOT NULL)");
-        });
+        //modelBuilder.Entity<AspNetRole>(entity =>
+        //{
+        //    entity.HasIndex(e => e.NormalizedName, "RoleNameIndex")
+        //        .IsUnique()
+        //        .HasFilter("([NormalizedName] IS NOT NULL)");
+        //});
 
         //modelBuilder.Entity<AspNetUser>(entity =>
         //{
