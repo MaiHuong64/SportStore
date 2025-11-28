@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System;
 
 namespace SportStore.Controllers
 {
@@ -161,7 +162,43 @@ namespace SportStore.Controllers
 
             return View(cart);
         }
+        public async Task<IActionResult> ProcessCheckout()
+        {
+            var customerId = HttpContext.Session.GetInt32("CustomerID");
+            var maxID = await _context.Invoices.MaxAsync(i => i.InvoiceId);
+            var cart = GetCartItems();
+            string invCode = "INV" + (maxID + 1).ToString("D3");
+            var inv = new Invoice
+            {
+                InvoiceCode = invCode,
+                InvoiceDate = DateOnly.FromDateTime(DateTime.Now),
+                InvoiceStatus = 1,
+                CustomerId = customerId,
+                EmployeeId = null,
+            };
+            _context.Invoices.Add(inv);
+            await _context.SaveChangesAsync();
 
+            foreach (var item in cart)
+            {
+                var detail = new InvoiceDetail
+                {
+                    InvoiceId = inv.InvoiceId,
+                    ProductId = item.product.ProductId,
+                    Quantity = item.quantity,
+                    UnitPrice = item.price
+                };
+                _context.InvoiceDetails.Add(detail);
+            }
+            await _context.SaveChangesAsync();
+            ClearAllCart();
+            TempData["Success"] = "Đặt hàng thành công!";
+            return RedirectToAction("successNotification");
+        }
+        public IActionResult successNotification()
+        {
+            return View();
+        }
 
         // GET: Customers
         public async Task<IActionResult> Index()
