@@ -15,18 +15,21 @@ namespace SportStore.Controllers
 
         public IActionResult Index()
         {
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var role = HttpContext.Session.GetString("Role");
+            if(role == null)
+            {
+                return RedirectToAction("Login", "Accounts");
+                //ViewBag.Layout = "_LayoutCutomer";
+            }
+            if(role == "Admin" || role =="Nhân viên")
+            {
+                ViewBag.Layout = "_Layout";
+            }
+            else
+            {
+                ViewBag.Layout = "_LayoutCutomer";
+            }
+                return View();
         }
     }
 }

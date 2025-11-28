@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using SportStore.Data;
 using SportStore.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportStore.Controllers
 {
@@ -19,55 +20,149 @@ namespace SportStore.Controllers
         {
             _context = context;
         }
+        public IActionResult ViewCart()
+        {
+            return View(GetCartItems());
+        }
 
-        List<CartItem> GetCartItems()
+        public List<CartItem> GetCartItems()
         {
             var session = HttpContext.Session;
             string jsoncart = session.GetString("shopcart");
             if (jsoncart != null)
             {
                 var cartItems = JsonConvert.DeserializeObject<List<CartItem>>(jsoncart);
-                return cartItems ?? new List<CartItem> { };
+                return cartItems ?? new List<CartItem>();
             }
             return new List<CartItem>();
         }
-        void SaveCartSession(List<CartItem> list)
+        public void SaveCartSession(List<CartItem> list)
         {
             var session = HttpContext.Session;
-            string jsoncart = JsonConvert.SerializeObject(list);
+
+            var settings = new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                // Hoặc dùng: PreserveReferencesHandling = PreserveReferencesHandling.Objects
+            };
+
+            string jsoncart = JsonConvert.SerializeObject(list, settings);
             session.SetString("shopcart", jsoncart);
         }
-        // Xóa session giỏ hàng
+
         void ClearCart()
         {
             var session = HttpContext.Session;
             session.Remove("shopcart");
         }
-
-        public async Task<IActionResult> AddCart(int id)
+        public IActionResult ClearAllCart()
+        { 
+          
+            ClearCart();
+            TempData["Success"] = "Đã xóa toàn bộ giỏ hàng";
+            return RedirectToAction(nameof(ViewCart));
+        }
+        public async Task<IActionResult> AddToCart(int id)
         {
-            var p = await _context.Products.Include(a => a.ProductDetails).FirstOrDefaultAsync(p => p.ProductId == id);
-            if (p == null) {
+            var customerId = HttpContext.Session.GetInt32("CustomerID");
+            if(customerId == null)
+            {
+                return RedirectToAction("Login", "Accounts");
+            }
+            var pd = await _context.ProductDetails
+                .Include(pd => pd.Product)
+                .FirstOrDefaultAsync(pd => pd.ProductDetailId == id);
+            if(pd == null)
+            {
                 return NotFound("Sản phẩm không tồn tại");
             }
             var cart = GetCartItems();
-            var item = cart.Find(p => p.product.ProductId == id);
+            var item = cart.Find(c => c.producDetailId == id);
+
             if (item != null)
             {
                 item.quantity++;
             }
             else
             {
-                cart.Add(new CartItem() { product = p, quantity = 1 });
+                cart.Add(new CartItem() { product = pd.Product, producDetailId = id, price = pd.Price, quantity = 1 });
             }
             SaveCartSession(cart);
             return RedirectToAction(nameof(ViewCart));
         }
 
-        public IActionResult ViewCart()
+        [HttpPost]
+        public IActionResult UpdateItem(int productDetailId, int quantity)
         {
-            return View(GetCartItems());
+            var cart = GetCartItems();
+            var item = cart.Find(c => c.producDetailId == productDetailId);
+
+            if (item != null)
+            {
+                var pd = _context.ProductDetails.Find(productDetailId);
+                if (pd != null)
+                {
+                    if (quantity > 0)
+                    {
+                        item.quantity = quantity;
+                        SaveCartSession(cart);
+                        TempData["Success"] = "Đã cập nhật số lượng";
+                    }
+                    else
+                    {
+                        TempData["Error"] = "Số lượng phải lớn hơn 0";
+                    }
+                }
+            }
+            else
+            {
+                TempData["Error"] = "Không tìm thấy sản phẩm trong giỏ hàng";
+            }
+
+            return RedirectToAction(nameof(ViewCart));
         }
+
+        [HttpPost]
+        public IActionResult RemoveItem(int productDetailId)
+        {
+            var cart = GetCartItems();
+            var item = cart.Find(c => c.producDetailId == productDetailId);
+
+            if (item != null)
+            {
+                cart.Remove(item);
+                SaveCartSession(cart);
+                TempData["Success"] = "Đã xóa sản phẩm khỏi giỏ hàng";
+            }
+            else
+            {
+                TempData["Error"] = "Không tìm thấy sản phẩm trong giỏ hàng";
+            }
+
+            return RedirectToAction(nameof(ViewCart));
+        }
+
+        public IActionResult Checkout()
+        {
+            var customerId = HttpContext.Session.GetInt32("CustomerID");
+            if (customerId == null)
+            {
+                TempData["Error"] = "Vui lòng đăng nhập để thanh toán";
+                return RedirectToAction("Login", "Accounts");
+            }
+            var cart = GetCartItems();
+            if (cart.Count == 0)    
+            {
+                TempData["Error"] = "Giỏ hàng trống";
+                return RedirectToAction("ViewCart", "Customers");
+            }
+            var customer = _context.Customers.Find(customerId.Value);
+            ViewBag.Customer = customer;
+
+            return View(cart);
+        }
+
+
         // GET: Customers
         public async Task<IActionResult> Index()
         {

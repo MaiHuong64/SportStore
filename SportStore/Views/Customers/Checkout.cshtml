@@ -1,0 +1,139 @@
+﻿@* Views/Customers/Checkout.cshtml *@
+@model List<SportStore.Models.CartItem>
+@{
+    ViewData["Title"] = "Thanh toán";
+    var customer = ViewBag.Customer as SportStore.Models.Customer;
+    decimal totalAmount = Model.Sum(item => item.price * item.quantity);
+}
+
+<div class="container py-5">
+    <h2 class="mb-4"><i class="bi bi-credit-card"></i> Thanh toán đơn hàng</h2>
+
+    <form asp-action="ProcessCheckout" method="post">
+        @Html.AntiForgeryToken()
+        <div class="row">
+            <!-- Thông tin giao hàng -->
+            <div class="col-md-7">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-truck"></i> Thông tin giao hàng</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Họ tên</label>
+                            <input type="text" class="form-control" value="@customer?.FullName" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                            <input type="tel" name="phoneNumber" class="form-control"
+                                   value="@customer?.PhoneNumber" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Địa chỉ giao hàng <span class="text-danger">*</span></label>
+                            <textarea name="shippingAddress" class="form-control" rows="3" required>@customer?.Address</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ghi chú</label>
+                            <textarea name="note" class="form-control" rows="2"
+                                      placeholder="Ghi chú cho người bán..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-wallet2"></i> Phương thức thanh toán</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="paymentMethod"
+                                   id="cod" value="COD" checked>
+                            <label class="form-check-label" for="cod">
+                                <strong>Thanh toán khi nhận hàng (COD)</strong>
+                                <p class="text-muted small mb-0">Thanh toán bằng tiền mặt khi nhận hàng</p>
+                            </label>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="paymentMethod"
+                                   id="bank" value="Chuyển khoản">
+                            <label class="form-check-label" for="bank">
+                                <strong>Chuyển khoản ngân hàng</strong>
+                                <p class="text-muted small mb-0">Chuyển khoản qua ngân hàng</p>
+                            </label>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="paymentMethod"
+                                   id="momo" value="Momo">
+                            <label class="form-check-label" for="momo">
+                                <strong>Ví MoMo</strong>
+                                <p class="text-muted small mb-0">Thanh toán qua ví MoMo</p>
+                            </label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="paymentMethod"
+                                   id="vnpay" value="VNPay">
+                            <label class="form-check-label" for="vnpay">
+                                <strong>VNPay</strong>
+                                <p class="text-muted small mb-0">Thanh toán qua VNPay</p>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Đơn hàng -->
+            <div class="col-md-5">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-cart-check"></i> Đơn hàng của bạn</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var item in Model)
+                        {
+                            <div class="d-flex mb-3 pb-3 border-bottom">
+                                <img src="~/images/@item.product.Img" width="60" height="60"
+                                     class="me-3" alt="@item.product.FullName">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">@item.product.FullName</h6>
+                                    <div class="d-flex justify-content-between">
+                                        <span>@item.price.ToString("N0")đ x @item.quantity</span>
+                                        <strong>@((item.price * item.quantity).ToString("N0"))đ</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span>Tạm tính:</span>
+                            <strong>@totalAmount.ToString("N0")đ</strong>
+                        </div>
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span>Phí vận chuyển:</span>
+                            <strong class="text-success">Miễn phí</strong>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <h5>Tổng cộng:</h5>
+                            <h5 class="text-danger">@totalAmount.ToString("N0")đ</h5>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger btn-lg w-100 mt-3">
+                            <i class="bi bi-check-circle"></i> Đặt hàng
+                        </button>
+
+                        <a asp-action="ViewCart" class="btn btn-outline-secondary w-100 mt-2">
+                            <i class="bi bi-arrow-left"></i> Quay lại giỏ hàng
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+</div>

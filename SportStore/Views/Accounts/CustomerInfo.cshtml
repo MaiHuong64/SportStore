@@ -1,12 +1,81 @@
-﻿@{
-    ViewData["Title"] = "Hồ sơ khách hàng";
+﻿
+@{
+    ViewData["Title"] = "Thông tin tài khoản";
+    var customer = ViewBag.Kh as SportStore.Models.Customer;
 }
 
-@if (ViewBag.Kh != null)
-{
-    <p>Xin chào: @ViewBag.Kh.FullName</p>
-}
-else if (ViewBag.Error != null)
-{
-    <p class="text-danger">@ViewBag.Error</p>
-}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-person-circle" style="font-size: 100px;"></i>
+                    <h4 class="mt-3">@Context.Session.GetString("FullName")</h4>
+                    <p class="text-muted">@Context.Session.GetString("PhoneNumber")</p>
+                </div>
+            </div>
+            <div class="list-group mt-3">
+                <a href="#" class="list-group-item list-group-item-action active">
+                    <i class="bi bi-person"></i> Thông tin tài khoản
+                </a>
+                <a asp-controller="Orders" asp-action="MyOrders" class="list-group-item list-group-item-action">
+                    <i class="bi bi-box-seam"></i> Đơn hàng của tôi
+                </a>
+                <a asp-controller="Customers" asp-action="ViewCart" class="list-group-item list-group-item-action">
+                    <i class="bi bi-cart3"></i> Giỏ hàng
+                </a>
+                <a asp-controller="Accounts" asp-action="Logout" class="list-group-item list-group-item-action text-danger">
+                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="bi bi-person-lines-fill"></i> Thông tin cá nhân</h4>
+                </div>
+                <div class="card-body">
+                    @if (customer != null)
+                    {
+                        <div class="row mb-3">
+                            <div class="col-md-3"><strong>Mã khách hàng:</strong></div>
+                            <div class="col-md-9">@customer.CustomerCode</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-3"><strong>Họ tên:</strong></div>
+                            <div class="col-md-9">@customer.FullName</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-3"><strong>Email:</strong></div>
+                            <div class="col-md-9">@customer.Email</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-3"><strong>Số điện thoại:</strong></div>
+                            <div class="col-md-9">@customer.PhoneNumber</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-3"><strong>Địa chỉ:</strong></div>
+                            <div class="col-md-9">@customer.Address</div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <a asp-action="EditProfile" class="btn btn-primary">
+                            <i class="bi bi-pencil-square"></i> Chỉnh sửa thông tin
+                        </a>
+                        <a asp-action="ChangePassword" class="btn btn-warning">
+                            <i class="bi bi-key"></i> Đổi mật khẩu
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger">
+                            Không tìm thấy thông tin khách hàng
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

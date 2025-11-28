@@ -1,3 +1,16 @@
 ﻿@{
-    Layout = "_LayoutCustomer";
+    var role = Context.Session.GetString("Role");
+
+    if (role == "Admin" || role == "Nhân viên")
+    {
+        Layout = "_LayoutAdmin";
+    }
+    else if (role == "Khách hàng")
+    {
+        Layout = "_LayoutCustomer";
+    }
+    else
+    {
+        Layout = "_LayoutCustomer";
+    }
 }
