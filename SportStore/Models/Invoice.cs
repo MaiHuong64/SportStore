@@ -19,7 +19,7 @@ public partial class Invoice
 
     public DateOnly? InvoiceDate { get; set; }
 
-    public int? InvoiceType { get; set; }
+    public int? InvoiceStatus { get; set; }
 
     [Column("CustomerID")]
     public int? CustomerId { get; set; }
