@@ -34,12 +34,14 @@ namespace SportStore.Controllers
                 ViewBag.TotalCustomers = _context.Customers.Count();
                 ViewBag.TotalProducts = _context.Products.Count();
 
-                ViewBag.RecentInvoices = _context.Invoices
+                var RecentInvoices = _context.Invoices
                     .Include(i => i.Customer)
                     .Include(i => i.InvoiceDetails)
+
                     .OrderByDescending(i => i.InvoiceDate)
                     .Take(4)
                     .ToList();
+                ViewBag.RecentInvoices = RecentInvoices;
 
                 ViewBag.TopProducts = _context.Products
                     .Include(p => p.InvoiceDetails)

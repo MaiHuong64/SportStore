@@ -132,9 +132,9 @@ public partial class ApplicationDbContext : IdentityDbContext
         modelBuilder.Entity<InvoiceDetail>(entity =>
         {
             entity.HasKey(e => e.InvoiceDetailId).HasName("PK__InvoiceD__1F1578F115BCB5CD");
-
+            entity.Property(e => e.UnitPrice).HasPrecision(18, 2);
             entity.HasOne(d => d.Invoice).WithMany(p => p.InvoiceDetails).HasConstraintName("FK_InvoiceDetail_Invoice");
-
+                
             entity.HasOne(d => d.Product).WithMany(p => p.InvoiceDetails).HasConstraintName("FK_InvoiceDetail_Product");
         });
 
