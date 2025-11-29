@@ -23,7 +23,7 @@ namespace SportStore.Controllers
             }
             if(role == "Admin" || role =="Nhân viên")
             {
-                ViewBag.Layout = "_Layout";
+                ViewBag.Layout = "_LayoutAdmin";
 
                 var invoices = _context.Invoices.Include(i => i.InvoiceDetails).ToList();
                 ViewBag.TotalRevenue = invoices
@@ -56,7 +56,7 @@ namespace SportStore.Controllers
             }
             else
             {
-                ViewBag.Layout = "_LayoutCutomer";
+                ViewBag.Layout = "_LayoutCustomer";
             }
             return View();
         }
