@@ -1,16 +1,17 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SportStore.Data;
 using SportStore.Models;
 
 namespace SportStore.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ApplicationDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ApplicationDbContext context)
         {
-            _logger = logger;
+            _context = context;
         }
 
         public IActionResult Index()
@@ -19,17 +20,43 @@ namespace SportStore.Controllers
             if(role == null)
             {
                 return RedirectToAction("Login", "Accounts");
-                //ViewBag.Layout = "_LayoutCutomer";
             }
-            if(role == "Admin" || role =="Nhân viên")
+            if(role == "Admin" || role =="NhÃ¢n viÃªn")
             {
                 ViewBag.Layout = "_Layout";
+
+                var invoices = _context.Invoices.Include(i => i.InvoiceDetails).ToList();
+                ViewBag.TotalRevenue = invoices
+                    .Where(i => i.InvoiceStatus == 1)
+                    .Sum(i => i.InvoiceDetails.Sum(d => (d.Quantity ?? 0) * (d.UnitPrice ?? 0)));
+
+                ViewBag.TotalOrders = _context.Invoices.Count();
+                ViewBag.TotalCustomers = _context.Customers.Count();
+                ViewBag.TotalProducts = _context.Products.Count();
+
+                ViewBag.RecentInvoices = _context.Invoices
+                    .Include(i => i.Customer)
+                    .Include(i => i.InvoiceDetails)
+                    .OrderByDescending(i => i.InvoiceDate)
+                    .Take(4)
+                    .ToList();
+
+                ViewBag.TopProducts = _context.Products
+                    .Include(p => p.InvoiceDetails)
+                    .Select(p => new {
+                        p.FullName,
+                        TotalSold = p.InvoiceDetails.Sum(d => d.Quantity ?? 0),
+                        Revenue = p.InvoiceDetails.Sum(d => (d.Quantity ?? 0) * (d.UnitPrice ?? 0))
+                    })
+                    .OrderByDescending(p => p.TotalSold)
+                    .Take(4)
+                    .ToList();
             }
             else
             {
                 ViewBag.Layout = "_LayoutCutomer";
             }
-                return View();
+            return View();
         }
     }
 }

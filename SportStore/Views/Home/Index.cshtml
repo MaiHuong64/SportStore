@@ -1,7 +1,147 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Dashboard";
+    var totalRevenue = ViewBag.TotalRevenue ?? 0;
+    var totalOrders = ViewBag.TotalOrders ?? 0;
+    var totalCustomers = ViewBag.TotalCustomers ?? 0;
+    var totalProducts = ViewBag.TotalProducts ?? 0;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Trang quản trị</h1>
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card fade-in-up">
+            <div class="stat-icon primary">
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+            <div class="stat-value">@(totalRevenue / 1000000)M</div>
+            <div class="stat-label">Tổng Doanh Thu</div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card fade-in-up" style="animation-delay: 0.1s">
+            <div class="stat-icon success">
+                <i class="bi bi-cart-check"></i>
+            </div>
+            <div class="stat-value">@totalOrders</div>
+            <div class="stat-label">Đơn Hàng</div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card fade-in-up" style="animation-delay: 0.2s">
+            <div class="stat-icon warning">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="stat-value">@totalCustomers</div>
+            <div class="stat-label">Khách Hàng</div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card fade-in-up" style="animation-delay: 0.3s">
+            <div class="stat-icon danger">
+                <i class="bi bi-box-seam"></i>
+            </div>
+            <div class="stat-value">@totalProducts</div>
+            <div class="stat-label">Sản Phẩm</div>
+        </div>
+    </div>
 </div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="table-container fade-in-up" style="animation-delay: 0.4s">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-clock-history text-primary"></i> Đơn Hàng Gần Đây
+                </h5>
+                <a asp-controller="Invoices" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                    Xem Tất Cả <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Mã ĐH</th>
+                            <th>Khách Hàng</th>
+                            <th>Ngày Đặt</th>
+                            <th>Tổng Tiền</th>
+                            <th>Trạng Thái</th>
+                            <th>Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(ViewBag.RecentInvoices != null)
+                        {
+                            var recentInvoices = ViewBag.RecentInvoices as IEnumerable<Invoice>;
+                            if(recentInvoices != null)
+                            {
+                                foreach(var invoice in recentInvoices)
+                                {
+                                    decimal total = 0;
+                                    foreach(var detail in invoice.InvoiceDetails)
+                                    {
+                                        total += (detail.Quantity ?? 0) * (detail.UnitPrice ?? 0);
+                                    }
+                                    var statusClass = invoice.InvoiceStatus == 1 ? "bg-success" :
+                                                    invoice.InvoiceStatus == 2 ? "bg-warning" : "bg-primary";
+                                    var statusText = invoice.InvoiceStatus == 1 ? "Hoàn Thành" :
+                                                   invoice.InvoiceStatus == 2 ? "Đang Giao" : "Chờ Xử Lý";
+                                    <tr>
+                                        <td><strong>@invoice.InvoiceCode</strong></td>
+                                        <td>@invoice.Customer?.FullName</td>
+                                        <td>@invoice.InvoiceDate?.ToString("dd/MM/yyyy")</td>
+                                        <td><strong>@total.ToString("N0")đ</strong></td>
+                                        <td><span class="badge @statusClass">@statusText</span></td>
+                                        <td>
+                                            <div class="table-actions">
+                                                <a asp-controller="Invoices" asp-action="Details" asp-route-id="@invoice.InvoiceId" class="btn btn-sm btn-info"><i class="bi bi-eye"></i></a>
+                                                <a asp-controller="Invoices" asp-action="Edit" asp-route-id="@invoice.InvoiceId" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="content-header fade-in-up" style="animation-delay: 0.5s">
+            <h5 class="mb-4 fw-bold">
+                <i class="bi bi-graph-up text-success"></i> Sản Phẩm Bán Chạy
+            </h5>
+            <div class="d-flex flex-column gap-3">
+                @if(ViewBag.TopProducts != null)
+                {
+                    var colors = new[] { "primary", "success", "warning", "secondary" };
+                    int index = 0;
+                    var topProducts = ViewBag.TopProducts as IEnumerable<dynamic>;
+                    if(topProducts != null)
+                    {
+                        foreach(var product in topProducts)
+                        {
+                            var color = colors[index % colors.Length];
+                            <div class="d-flex align-items-center justify-content-between p-3 rounded" style="background: #F9FAFB;">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="bg-@color text-white rounded d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-weight: 700;">@(index + 1)</div>
+                                    <div>
+                                        <div class="fw-600">@product.FullName</div>
+                                        <small class="text-muted">Đã bán: @product.TotalSold</small>
+                                    </div>
+                                </div>
+                                <div class="text-@color fw-bold">@(((decimal)product.Revenue / 1000000).ToString("F1"))M</div>
+                            </div>
+                            index++;
+                        }
+                    }
+                }
+            </div>
+            <a asp-controller="Products" asp-action="Index" class="btn btn-primary w-100 mt-4">
+                <i class="bi bi-box-seam"></i> Quản Lý Sản Phẩm
+            </a>
+        </div>
+    </div>
+</div>
+
