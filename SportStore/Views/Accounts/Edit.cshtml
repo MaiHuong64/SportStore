@@ -1,59 +1,56 @@
 ﻿@model SportStore.Models.Account
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Chỉnh Sửa Tài Khoản";
 }
 
-<h1>Edit</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="bi bi-pencil-square"></i> Chỉnh Sửa Khách Hàng</h2>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Quay Lại
+    </a>
+</div>
 
-<h4>Account</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="AccountId" />
-            <div class="form-group">
-                <label asp-for="PhoneNumber" class="control-label"></label>
+<div class="content-header">
+    <form asp-action="Edit">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+        <input type="hidden" asp-for="AccountId" />
+
+        <div class="row">
+            
+            <div class="col-md-6 mb-3">
+                <label asp-for="PhoneNumber" class="form-label"></label>
                 <input asp-for="PhoneNumber" class="form-control" />
                 <span asp-validation-for="PhoneNumber" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Role" class="control-label"></label>
+            
+            <div class="col-md-6 mb-3">
+                <label asp-for="Role" class="form-label"></label>
                 <input asp-for="Role" class="form-control" />
                 <span asp-validation-for="Role" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Status" class="control-label"></label>
+
+            <div class="col-md-6 mb-3">
+                <label asp-for="Status" class="form-label"></label>
                 <input asp-for="Status" class="form-control" />
                 <span asp-validation-for="Status" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="CustomerId" class="control-label"></label>
-                <select asp-for="CustomerId" class="form-control" asp-items="ViewBag.CustomerId"></select>
-                <span asp-validation-for="CustomerId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="EmployeeId" class="control-label"></label>
-                <select asp-for="EmployeeId" class="form-control" asp-items="ViewBag.EmployeeId"></select>
-                <span asp-validation-for="EmployeeId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
+        </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i> Lưu Thay Đổi
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-x-circle"></i> Hủy
+            </a>
+        </div>
+
+    </form>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

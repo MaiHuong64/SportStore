@@ -16,6 +16,77 @@
     </div>
 </div>
 
+@if(Model.CustomerId != null){
+    <div class="content-header">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="text-muted small">@Html.DisplayNameFor(model => model.Customer.CustomerCode)</label>
+                <div class="fs-5 fw-semibold">@Html.DisplayFor(model => model.Customer.CustomerCode)</div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="text-muted small">@Html.DisplayNameFor(model => model.Customer.FullName)</label>
+                <div class="fs-5 fw-semibold">@Html.DisplayFor(model => model.Customer.FullName)</div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="text-muted small">Email</label>
+                <div class="fs-5">
+                    <i class="bi bi-envelope"></i> @Html.DisplayFor(model => model.Customer.Email)
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="text-muted small">@Html.DisplayNameFor(model => model.Customer.PhoneNumber)</label>
+                <div class="fs-5 fw-semibold">
+                    <i class="bi bi-telephone"></i> @Html.DisplayFor(model => model.Customer.PhoneNumber)
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="text-muted small">@Html.DisplayNameFor(model => model.Role)</label>
+                <div class="fs-5 fw-semibold">
+                    <i class="bi bi-person-badge"></i> @Html.DisplayFor(model => model.Role)
+                </div>
+            </div>
+        </div>
+
+    </div>
+}
+@if(Model.EmployeeId != null){
+<div class="content-header">
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="text-muted small">@Html.DisplayNameFor(model => model.Employee.EmployeeCode)</label>
+            <div class="fs-5 fw-semibold">@Html.DisplayFor(model => model.Employee.EmployeeCode)</div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="text-muted small">@Html.DisplayNameFor(model => model.Employee.FullName)</label>
+            <div class="fs-5 fw-semibold">@Html.DisplayFor(model => model.Employee.FullName)</div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="text-muted small">Email</label>
+            <div class="fs-5">
+                <i class="bi bi-envelope"></i> @Html.DisplayFor(model => model.Employee.Email)
+             </div>
+        </div>
+        <div class="col-md-6 mb-3">
+             <label class="text-muted small">@Html.DisplayNameFor(model => model.Employee.PhoneNumber)</label>
+             <div class="fs-5 fw-semibold">
+                <i class="bi bi-telephone"></i> @Html.DisplayFor(model => model.Employee.PhoneNumber)
+             </div>
+        </div>
+    </div>
+
+</div>
+}
+</div>
+
 <div class="content-header">
 
     <div class="row">
