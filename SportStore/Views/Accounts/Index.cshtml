@@ -4,7 +4,7 @@
     ViewData["Title"] = "Quản lý tài khoản";
 } *@
 
-<h1>Index</h1>
+<h1>Danh sách tài khoản</h1>
 
 <p>
     <a asp-action="Create">Thêm mới</a>
@@ -21,13 +21,7 @@
             <th>
                 @Html.DisplayNameFor(model => model.Status)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Customer)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Employee)
-            </th>
-            <th></th>
+            <th>Thao Tác</th>
         </tr>
     </thead>
     <tbody>
@@ -40,19 +34,21 @@
                 @Html.DisplayFor(modelItem => item.Role)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Status)
+                @(item.Status == 1 ? "Đang hoạt động" : "Khóa tài khoản")
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Customer.CustomerId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Employee.EmployeeId)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.AccountId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.AccountId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.AccountId">Delete</a>
-            </td>
+                <td>
+                    <div class="table-actions">
+                        <a asp-action="Details" asp-route-id="@item.AccountId" class="btn btn-sm btn-info" title="Chi tiết">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a asp-action="Edit" asp-route-id="@item.AccountId" class="btn btn-sm btn-primary" title="Sửa">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@item.AccountId" class="btn btn-sm btn-danger" title="Xóa">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
+                </td>
         </tr>
 }
     </tbody>
