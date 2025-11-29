@@ -14,14 +14,14 @@ public partial class InvoiceDetail
     public int InvoiceDetailId { get; set; }
 
     [Column("InvoiceID")]
-    public int? InvoiceId { get; set; }
+    public int InvoiceId { get; set; }
 
     [Column("ProductID")]
     public int? ProductId { get; set; }
     [Display(Name = "Số lượng")]
     public int? Quantity { get; set; }
 
-    [Column(TypeName = "decimal(18, 0)")]
+    [Column(TypeName = "decimal(18, 2)")]
     [Display(Name = "Đơn giá")]
     public decimal? UnitPrice { get; set; }
 

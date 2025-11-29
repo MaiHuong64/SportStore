@@ -8,6 +8,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="wwwroot\Final\SportStore\.vs\SportStore.slnx\v18\DocumentLayout.backup.json" />
+    <Content Include="wwwroot\Final\SportStore\.vs\SportStore.slnx\v18\DocumentLayout.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Final\SportStore\.vs\ProjectEvaluation\sportstore.metadata.v10.bin" />
+    <None Include="wwwroot\Final\SportStore\.vs\ProjectEvaluation\sportstore.projects.v10.bin" />
+    <None Include="wwwroot\Final\SportStore\.vs\ProjectEvaluation\sportstore.strings.v10.bin" />
+    <None Include="wwwroot\Final\SportStore\.vs\SportStore.slnx\config\applicationhost.config" />
+    <None Include="wwwroot\Final\SportStore\.vs\SportStore.slnx\DesignTimeBuild\.dtbcache.v2" />
+    <None Include="wwwroot\Final\SportStore\.vs\SportStore.slnx\FileContentIndex\ff76d71d-2c2c-4b73-ae1a-f8f42daa7cf3.vsidx" />
+    <None Include="wwwroot\Final\SportStore\.vs\SportStore.slnx\v18\.futdcache.v2" />
+    <None Include="wwwroot\Final\SportStore\SportStore\SportStore.csproj" />
+    <None Include="wwwroot\Final\SportStore\SportStore\SportStore.csproj.user" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.17" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.17" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.17" />
