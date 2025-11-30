@@ -18,7 +18,7 @@ namespace SportStore.Controllers
         {
             _context = context;
         }
-
+      
         public string? Upload(IFormFile file)
         {
             string? uploadFileName = null;
@@ -74,10 +74,11 @@ namespace SportStore.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductId,ProductCode,FullName,Description,Brand,CategoryId,SupplierId,Img")] Product product)
+        public async Task<IActionResult> Create(IFormFile Img, [Bind("ProductId,ProductCode,FullName,Description,Brand,CategoryId,SupplierId,Img")] Product product)
         {
             if (ModelState.IsValid)
             {
+                product.Img = Upload(Img);
                 _context.Add(product);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -181,5 +182,7 @@ namespace SportStore.Controllers
         {
             return _context.Products.Any(e => e.ProductId == id);
         }
+
+       
     }
 }

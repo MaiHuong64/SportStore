@@ -45,5 +45,17 @@ namespace SportStore.Controllers
 
             return View(product);
         }
+        public void GetData()
+        {
+            ViewBag.product = _context.Products.Include(p => p.ProductDetails).ToList();
+
+        }
+        public async Task<IActionResult> Search(string keyword)
+        {
+            GetData();
+            var applicationDbContext = _context.Products.Where(p => p.FullName.Contains(keyword) || p.Brand.Contains(keyword));
+            return View(await applicationDbContext.ToListAsync());
+        }
+        //public async Task<IActionResult> Brand
     }
 }
