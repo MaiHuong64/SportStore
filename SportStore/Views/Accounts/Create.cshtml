@@ -1,54 +1,128 @@
-﻿@model SportStore.Models.Account
-
+@model SportStore.Models.Account
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Tạo Tài Khoản Mới";
+    Layout = "_LayoutAdmin";
 }
 
-<h1>Create</h1>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <div class="mb-3">
+                    <i class="bi bi-person-plus-fill text-primary" style="font-size: 3rem;"></i>
+                </div>
+                <h2 class="fw-bold">Tạo Tài Khoản Mới</h2>
+                <p class="text-muted">Điền thông tin để tạo tài khoản cho nhân viên</p>
+            </div>
 
-<h4>Account</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="PhoneNumber" class="control-label"></label>
-                <input asp-for="PhoneNumber" class="form-control" />
-                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            <!-- Form Card -->
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <!-- Thông tin đăng nhập -->
+                        <h5 class="mb-3 text-primary">
+                            <i class="bi bi-shield-lock me-2"></i>Thông tin đăng nhập
+                        </h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="PhoneNumber" class="form-label fw-semibold">
+                                    Số điện thoại <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                                    <input asp-for="PhoneNumber" class="form-control" placeholder="VD: 0912345678" />
+                                </div>
+                                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Password" class="form-label fw-semibold">
+                                    Mật khẩu <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                    <input asp-for="Password" type="password" class="form-control" placeholder="Nhập mật khẩu" />
+                                </div>
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- Phân quyền -->
+                        <h5 class="mb-3 text-primary">
+                            <i class="bi bi-person-badge me-2"></i>Phân quyền và trạng thái
+                        </h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label asp-for="Role" class="form-label fw-semibold">
+                                    Vai trò <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-award"></i></span>
+                                    <select asp-for="Role" class="form-select">
+                                        <option value="">Chọn vai trò</option>
+                                        <option value="Admin">Admin</option>
+                                        <option value="Nhân viên">Nhân viên</option>
+                                    </select>
+                                </div>
+                                <span asp-validation-for="Role" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Status" class="form-label fw-semibold">
+                                    Trạng thái <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-toggle-on"></i></span>
+                                    <select asp-for="Status" class="form-select">
+                                        <option value="">Chọn trạng thái</option>
+                                        <option value="Hoạt động">Hoạt động</option>
+                                        <option value="Tạm khóa">Tạm khóa</option>
+                                    </select>
+                                </div>
+                                <span asp-validation-for="Status" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="EmployeeId" class="form-label fw-semibold">
+                                    Nhân viên <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    <select asp-for="EmployeeId" class="form-select" asp-items="ViewBag.EmployeeId">
+                                        <option value="">-- Chọn nhân viên --</option>
+                                    </select>
+                                </div>
+                                <span asp-validation-for="EmployeeId" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2 justify-content-end mt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4">
+                                <i class="bi bi-x-lg me-1"></i>Hủy
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check-lg me-1"></i>Tạo Tài Khoản
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
+
+            <!-- Helper Text -->
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    <i class="bi bi-asterisk text-danger" style="font-size: 0.5rem;"></i>
+                    Các trường đánh dấu (*) là bắt buộc
+                </small>
             </div>
-            <div class="form-group">
-                <label asp-for="Role" class="control-label"></label>
-                <select asp-for="Role" class="form-control">
-                    <option value="">Chọn vai trò</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Nhân viên">Nhân viên</option>
-                </select>
-                <span asp-validation-for="Role" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Status" class="control-label"></label>
-                <input asp-for="Status" class="form-control" />
-                <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="EmployeeId" class="control-label"></label>
-                <select asp-for="EmployeeId" class ="form-control" asp-items="ViewBag.EmployeeId"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
