@@ -92,15 +92,23 @@ namespace SportStore.Controllers
 
             if (acc.Role == "Admin" || acc.Role == "Nhân Viên")
             {
-                HttpContext.Session.SetInt32("EmployeeId", (int)acc.EmployeeId);
-                HttpContext.Session.SetString("FullName", acc.Employee.FullName);
+                if (acc.EmployeeId.HasValue)
+                {
+                    HttpContext.Session.SetInt32("EmployeeId", acc.EmployeeId.Value);
+                    HttpContext.Session.SetString("FullName", acc.Employee.FullName);
+                }
+
                 return RedirectToAction("Index", "Home");
             }
             else
             {
-                HttpContext.Session.SetInt32("CustomerId", (int)acc.CustomerId);
-                HttpContext.Session.SetString("FullName", acc.Customer.FullName);
-                return RedirectToAction("Index","Main");
+                if (acc.CustomerId.HasValue)
+                {
+                    HttpContext.Session.SetInt32("CustomerId", acc.CustomerId.Value);
+                    HttpContext.Session.SetString("FullName", acc.Customer.FullName);
+                }
+
+                return RedirectToAction("Index", "Main");
             }
         }
 

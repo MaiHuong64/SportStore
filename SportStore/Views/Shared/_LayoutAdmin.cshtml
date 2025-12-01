@@ -50,14 +50,14 @@
                 <div class="user-profile">
                     <div class="user-avatar">
                         @{
-                            var username = Context.Session.GetString("Username") ?? "Admin";
-                            var initial = username.Substring(0, 1).ToUpper();
+                            var username = Context.Session.GetString("FullName") ?? "Admin";
+                            var initial = username.Trim().Substring(0, 1).ToUpper();
                         }
                         @initial
                     </div>
                     <div class="user-info">
                         <div class="user-name">@username</div>
-                        <div class="user-role">Administrator</div>
+                        <div class="user-role">@initial</div>
                     </div>
                 </div>
             </div>
