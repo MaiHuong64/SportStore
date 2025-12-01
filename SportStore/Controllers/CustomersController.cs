@@ -65,7 +65,7 @@ namespace SportStore.Controllers
         }
         public async Task<IActionResult> AddToCart(int id)
         {
-            var customerId = HttpContext.Session.GetInt32("CustomerID");
+            var customerId = HttpContext.Session.GetInt32("CustomerId");
             if(customerId == null)
             {
                 return RedirectToAction("Login", "Accounts");
@@ -145,7 +145,7 @@ namespace SportStore.Controllers
 
         public IActionResult Checkout()
         {
-            var customerId = HttpContext.Session.GetInt32("CustomerID");
+            var customerId = HttpContext.Session.GetInt32("CustomerId");
             if (customerId == null)
             {
                 TempData["Error"] = "Vui lòng đăng nhập để thanh toán";
@@ -164,7 +164,7 @@ namespace SportStore.Controllers
         }
         public async Task<IActionResult> ProcessCheckout()
         {
-            var customerId = HttpContext.Session.GetInt32("CustomerID");
+            var customerId = HttpContext.Session.GetInt32("CustomerId");
             var maxID = await _context.Invoices.MaxAsync(i => i.InvoiceId);
             var cart = GetCartItems();
             string invCode = "INV" + (maxID + 1).ToString("D3");

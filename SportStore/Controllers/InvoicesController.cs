@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Humanizer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SportStore.Data;
 using SportStore.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportStore.Controllers
 {
@@ -54,8 +55,10 @@ namespace SportStore.Controllers
 
             var invoice = await _context.Invoices
                 .Include(i => i.InvoiceDetails)
+                .ThenInclude(id => id.Product)
                 .Include(i => i.Customer)
                 .Include(i => i.Employee)
+              
                 .FirstOrDefaultAsync(m => m.InvoiceId == id);
             if (invoice == null)
             {
@@ -110,13 +113,6 @@ namespace SportStore.Controllers
         {
             try
             {
-                //Console.WriteLine("\n=== INVOICE OBJECT ===");
-                //Console.WriteLine($"inv.CustomerId: {inv.CustomerId}");
-                //Console.WriteLine($"inv.EmployeeId: {inv.EmployeeId}");
-                //Console.WriteLine($"inv.InvoiceCode: {inv.InvoiceCode}");
-                //Console.WriteLine($"inv.InvoiceDate: {inv.InvoiceDate}");
-                //Console.WriteLine($"inv.InvoiceStatus: {inv.InvoiceStatus}");
-
                 var curEmp = HttpContext.Session.GetInt32("AccountId");
                 var empName = HttpContext.Session.GetString("FullName");
 
@@ -147,11 +143,7 @@ namespace SportStore.Controllers
 
                     InvoiceDetails = new List<InvoiceDetail>()
                 };
-
-                //Console.WriteLine($"invoice.CustomerId = {invoice.CustomerId}");
-                //Console.WriteLine($"invoice.EmployeeId = {invoice.EmployeeId}");
-                //Console.WriteLine($"invoice.InvoiceCode = {invoice.InvoiceCode}");
-                //await _context.SaveChangesAsync();
+             
 
                 foreach (var detail in InvoiceDetails)
                 {
@@ -177,9 +169,6 @@ namespace SportStore.Controllers
                 _context.Add(invoice);
                 await _context.SaveChangesAsync();
 
-                //Console.WriteLine($"invoice.InvoiceId = {invoice.InvoiceId}");
-                //Console.WriteLine($"invoice.CustomerId = {invoice.CustomerId}");
-
                 TempData["SuccessMessage"] = "Tạo hóa đơn thành công!";
                 return RedirectToAction(nameof(Index));
             }
@@ -203,13 +192,31 @@ namespace SportStore.Controllers
                 return NotFound();
             }
 
-            var invoice = await _context.Invoices.FindAsync(id);
+            var invoice = await _context.Invoices
+                .Include(d => d.InvoiceDetails)
+                .ThenInclude (d => d.Product)
+                .Include (i => i.Customer)
+                .Include (i => i.Employee)
+                .FirstOrDefaultAsync(m => m.InvoiceId == id);
+
+           
             if (invoice == null)
             {
                 return NotFound();
             }
             ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId", invoice.CustomerId);
             ViewData["EmployeeId"] = new SelectList(_context.Employees, "EmployeeId", "EmployeeId", invoice.EmployeeId);
+
+            ViewBag.InvoiceStatusList = new SelectList(new[]
+           {
+                new { Value = 0, Text = "🕐 Chờ xử lý" },
+                new { Value = 1, Text = "✓ Đã xác nhận" },
+                new { Value = 2, Text = "⟳ Đang xử lý" },
+                new { Value = 3, Text = "🚚 Đang giao hàng" },
+                new { Value = 4, Text = "✓ Hoàn thành" },
+                new { Value = 5, Text = "✕ Đã hủy" }
+            }, "Value", "Text", (int)invoice.InvoiceStatus);
+
             return View(invoice);
         }
 
@@ -218,36 +225,92 @@ namespace SportStore.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("InvoiceId,InvoiceCode,InvoiceDate,InvoiceType,CustomerId,EmployeeId")] Invoice invoice)
+        public async Task<IActionResult> Edit(int id, Invoice invoice,List<InvoiceDetail> invoiceDetails)
         {
             if (id != invoice.InvoiceId)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            ModelState.Remove("InvoiceDetails");
+            ModelState.Remove("Customer");
+            ModelState.Remove("Employee");
+
+            if (!ModelState.IsValid)
             {
-                try
+                ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "FullName", invoice.CustomerId);
+                ViewData["EmployeeId"] = new SelectList(_context.Employees, "EmployeeId", "FullName", invoice.EmployeeId);
+                ViewBag.InvoiceStatusList = new SelectList(new[]
                 {
-                    _context.Update(invoice);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
+            new { Value = 0, Text = "🕐 Chờ xử lý" },
+            new { Value = 1, Text = "✓ Đã xác nhận" },
+            new { Value = 2, Text = "⟳ Đang xử lý" },
+            new { Value = 3, Text = "🚚 Đang giao hàng" },
+            new { Value = 4, Text = "✓ Hoàn thành" },
+            new { Value = 5, Text = "✕ Đã hủy" }
+                 }, "Value", "Text", invoice.InvoiceStatus);
+
+                return View(invoice);
+            }
+
+            try
+            {
+                var existingInvoice = await _context.Invoices
+                    .Include(i => i.InvoiceDetails)
+                    .ThenInclude(d => d.Product)
+                    .FirstOrDefaultAsync(i => i.InvoiceId == id);
+                if (existingInvoice == null)
+                    return NotFound();
+
+                existingInvoice.InvoiceDate = invoice.InvoiceDate;
+                existingInvoice.InvoiceStatus = invoice.InvoiceStatus;
+
+
+                foreach (var detail in invoiceDetails)
                 {
-                    if (!InvoiceExists(invoice.InvoiceId))
+                    var exist = existingInvoice.InvoiceDetails
+                        .FirstOrDefault(d => d.InvoiceDetailId == detail.InvoiceDetailId);
+                    if (exist != null)
                     {
-                        return NotFound();
+                        exist.ProductId = detail.ProductId;
+                        exist.Quantity = detail.Quantity;
+                        exist.UnitPrice = detail.UnitPrice;
                     }
                     else
                     {
-                        throw;
+                        existingInvoice.InvoiceDetails.Add(new InvoiceDetail
+                        {
+                            ProductId = detail.ProductId,
+                            Quantity = detail.Quantity,
+                            UnitPrice = detail.UnitPrice
+                        });
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                var detailsToRemove = existingInvoice.InvoiceDetails
+                    .Where(d => !invoiceDetails.Any(f => f.InvoiceDetailId == d.InvoiceDetailId))
+                    .ToList();
+                _context.InvoiceDetails.RemoveRange(detailsToRemove);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Cập nhật hóa đơn thành công!";
+                return RedirectToAction(nameof(Details), new { id = invoice.InvoiceId });
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId", invoice.CustomerId);
-            ViewData["EmployeeId"] = new SelectList(_context.Employees, "EmployeeId", "EmployeeId", invoice.EmployeeId);
-            return View(invoice);
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Lỗi khi cập nhật hóa đơn: " + ex.Message);
+                ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "FullName", invoice.CustomerId);
+                ViewData["EmployeeId"] = new SelectList(_context.Employees, "EmployeeId", "FullName", invoice.EmployeeId);
+                ViewBag.InvoiceStatusList = new SelectList(new[]
+                 {
+                        new { Value = 0, Text = "🕐 Chờ xử lý" },
+                        new { Value = 1, Text = "✓ Đã xác nhận" },
+                        new { Value = 2, Text = "⟳ Đang xử lý" },
+                        new { Value = 3, Text = "🚚 Đang giao hàng" },
+                        new { Value = 4, Text = "✓ Hoàn thành" },
+                        new { Value = 5, Text = "✕ Đã hủy" }
+                    }, "Value", "Text", invoice.InvoiceStatus);
+                LoadProducts();
+                return View(invoice);
+            }
         }
 
         // GET: Invoices/Delete/5

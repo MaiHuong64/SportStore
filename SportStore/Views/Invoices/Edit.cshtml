@@ -1,50 +1,162 @@
 ﻿@model SportStore.Models.Invoice
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Chỉnh sửa hóa đơn";
 }
 
-<h1>Edit</h1>
+<div class="container py-5">
 
-<h4>Invoice</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="InvoiceId" />
-            <div class="form-group">
-                <label asp-for="InvoiceCode" class="control-label"></label>
-                <input asp-for="InvoiceCode" class="form-control" />
-                <span asp-validation-for="InvoiceCode" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="InvoiceDate" class="control-label"></label>
-                <input asp-for="InvoiceDate" class="form-control" />
-                <span asp-validation-for="InvoiceDate" class="text-danger"></span>
-            </div>
-           
-            <div class="form-group">
-                <label asp-for="CustomerId" class="control-label"></label>
-                <select asp-for="CustomerId" class="form-control" asp-items="ViewBag.CustomerId"></select>
-                <span asp-validation-for="CustomerId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="EmployeeId" class="control-label"></label>
-                <select asp-for="EmployeeId" class="form-control" asp-items="ViewBag.EmployeeId"></select>
-                <span asp-validation-for="EmployeeId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-pencil-square text-primary"></i> Chỉnh sửa hóa đơn
+            </h2>
+            <p class="text-muted mb-0">Mã hóa đơn: <strong>@Model.InvoiceCode</strong></p>
+        </div>
+        <a asp-action="Details" asp-route-id="@Model.InvoiceId" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Quay lại
+        </a>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="InvoiceId" />
+        <input type="hidden" asp-for="InvoiceCode" />
+        <input type="hidden" asp-for="CustomerId" />
+        <input type="hidden" asp-for="EmployeeId" />
+
+        <div class="row g-4">
+
+            <!-- CỘT TRÁI: Thông tin hóa đơn -->
+            <div class="col-lg-8">
+
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-4 pb-3 border-bottom">
+                            <i class="bi bi-file-text text-primary"></i> Thông tin hóa đơn
+                        </h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="InvoiceCode" class="form-label fw-semibold">
+                                    <i class="bi bi-hash"></i> Mã hóa đơn
+                                </label>
+                                <input asp-for="InvoiceCode" class="form-control" readonly />
+                                <span asp-validation-for="InvoiceCode" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="InvoiceDate" class="form-label fw-semibold">
+                                    <i class="bi bi-calendar-event"></i> Ngày lập hóa đơn
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="InvoiceDate" type="date" class="form-control" />
+                                <span asp-validation-for="InvoiceDate" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label asp-for="InvoiceStatus" class="form-label fw-semibold">
+                                    <i class="bi bi-check2-circle"></i> Trạng thái đơn hàng
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select asp-for="InvoiceStatus" class="form-select" asp-items="@ViewBag.InvoiceStatusList">
+                                    <option value="">-- Chọn trạng thái --</option>
+                                </select>
+                                <span asp-validation-for="InvoiceStatus" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CHI TIẾT SẢN PHẨM -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-4 pb-3 border-bottom">
+                            <i class="bi bi-cart-check text-warning"></i> Chi tiết sản phẩm
+                        </h5>
+
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th style="width: 60px;">STT</th>
+                                        <th>Sản phẩm</th>
+                                        <th style="width: 120px;">Số lượng</th>
+                                        <th style="width: 150px;">Đơn giá</th>
+                                        <th style="width: 150px;">Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.InvoiceDetails != null && Model.InvoiceDetails.Any())
+                                    {
+                                        int index = 0;
+                                        foreach (var detail in Model.InvoiceDetails)
+                                        {
+                                            <tr>
+                                                <td class="text-center text-muted">@(index + 1)</td>
+                                                <td>
+                                                    <input type="hidden" name="InvoiceDetails[@index].InvoiceDetailId" value="@detail.InvoiceDetailId" />
+                                                    <input type="hidden" name="InvoiceDetails[@index].ProductId" value="@detail.ProductId" />
+
+                                                    <strong>@(detail.Product?.FullName ?? $"Sản phẩm #{detail.ProductId}")</strong>
+                                                    <br />
+                                                    <small class="text-muted">Mã SP: @detail.ProductId</small>
+                                                </td>
+                                                <td>
+                                                    <input type="number" name="InvoiceDetails[@index].Quantity"
+                                                           value="@detail.Quantity"
+                                                           class="form-control form-control-sm text-center"
+                                                           min="1" required />
+                                                </td>
+                                                <td>
+                                                    <input type="number" name="InvoiceDetails[@index].UnitPrice"
+                                                           value="@detail.UnitPrice"
+                                                           class="form-control form-control-sm text-end"
+                                                           min="0" step="1000" required />
+                                                </td>
+                                                <td class="text-end fw-semibold">
+                                                    @{
+                                                        var totalPrice = (detail.Quantity ?? 0) * (detail.UnitPrice ?? 0);
+                                                    }
+                                                    @totalPrice.ToString("N0") đ
+                                                </td>
+                                            </tr>
+                                            index++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CỘT PHẢI: Thao tác -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-4 pb-3 border-bottom">
+                            <i class="bi bi-gear"></i> Thao tác
+                        </h5>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Lưu thay đổi
+                            </button>
+                            <a asp-action="Details" asp-route-id="@Model.InvoiceId" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Hủy bỏ
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <partial name="_ValidationScriptsPartial" />
 }

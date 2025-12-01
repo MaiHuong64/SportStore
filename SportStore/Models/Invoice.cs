@@ -38,3 +38,13 @@ public partial class Invoice
     [InverseProperty("Invoice")]
     public virtual ICollection<InvoiceDetail> InvoiceDetails { get; set; } = new List<InvoiceDetail>();
 }
+
+public enum InvoiceStatusEnum
+{
+    ChờXửLý = 0,
+    ĐãXácNhận = 1,
+    ĐangXửLý = 2,
+    ĐangGiao = 3,
+    HoànThành = 4,
+    ĐãHủy = 5
+}
