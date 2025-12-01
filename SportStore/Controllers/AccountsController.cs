@@ -26,10 +26,10 @@ namespace SportStore.Controllers
         
         public void GetData()
         {
-            var customerID = HttpContext.Session.GetInt32("CustomerID");
-            if(customerID.HasValue && customerID.Value > 0)
+            var customerId= HttpContext.Session.GetInt32("CustomerId");
+            if(customerId.HasValue && customerId.Value > 0)
             {
-                ViewBag.Kh = _context.Customers.FirstOrDefault(c => c.CustomerId == customerID.Value);
+                ViewBag.Kh = _context.Customers.FirstOrDefault(c => c.CustomerId == customerId.Value);
             }
         }
         public IActionResult Register()
@@ -85,20 +85,20 @@ namespace SportStore.Controllers
             {
                 return View();
             }
-            HttpContext.Session.SetInt32("AccountID", acc.AccountId);
+            HttpContext.Session.SetInt32("AccountId", acc.AccountId);
             HttpContext.Session.SetString("Role", acc.Role);
             HttpContext.Session.SetString("PhoneNumber", acc.PhoneNumber);
            
 
             if (acc.Role == "Admin" || acc.Role == "Nhân viên")
             {
-                HttpContext.Session.SetInt32("EmployeeID", (int)acc.EmployeeId);
+                HttpContext.Session.SetInt32("EmployeeId", (int)acc.EmployeeId);
                 HttpContext.Session.SetString("FullName", acc.Employee.FullName);
                 return RedirectToAction("Index", "Home");
             }
             else
             {
-                HttpContext.Session.SetInt32("CustomerID", (int)acc.CustomerId);
+                HttpContext.Session.SetInt32("CustomerId", (int)acc.CustomerId);
                 HttpContext.Session.SetString("FullName", acc.Customer.FullName);
                 return RedirectToAction("Index","Main");
             }
@@ -108,7 +108,7 @@ namespace SportStore.Controllers
         public IActionResult CustomerInfo()
         {
             GetData();
-            var customerId = HttpContext.Session.GetInt32("CustomerID");
+            var customerId = HttpContext.Session.GetInt32("CustomerId");
             var fullName = HttpContext.Session.GetString("FullName");
             return View();
         }
