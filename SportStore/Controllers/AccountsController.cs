@@ -90,7 +90,7 @@ namespace SportStore.Controllers
             HttpContext.Session.SetString("PhoneNumber", acc.PhoneNumber);
            
 
-            if (acc.Role == "Admin" || acc.Role == "Nhân viên")
+            if (acc.Role == "Admin" || acc.Role == "Nhân Viên")
             {
                 HttpContext.Session.SetInt32("EmployeeId", (int)acc.EmployeeId);
                 HttpContext.Session.SetString("FullName", acc.Employee.FullName);
