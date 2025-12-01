@@ -4,7 +4,7 @@
 
 @if (Model.Count > 0)
 {
-    int stt = 1;
+    int stt = 0;
     decimal tongtien = 0;
 
     <table class="table table-striped">
@@ -21,6 +21,7 @@
         <tbody>
             @foreach (var item in Model)
             {
+                stt++;
                 var thanhtien = item.price * item.quantity;
                 tongtien += thanhtien;
 

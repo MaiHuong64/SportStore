@@ -1,0 +1,80 @@
+﻿@model SportStore.Models.Product
+
+<div class="container my-5">
+    <div class="row">
+        <!-- Hình ảnh sản phẩm -->
+        <div class="col-md-5">
+            <img src="~/images/@(Model.Img ?? "default.png")"
+                 class="img-fluid rounded shadow-sm"
+                 alt="@Model.FullName" />
+        </div>
+
+        <!-- Thông tin sản phẩm -->
+        <div class="col-md-7">
+            <h3>@Model.FullName</h3>
+            <p class="text-muted">@Model.Brand</p>
+            <p class="fw-bold text-primary">
+                @Model.ProductDetails.FirstOrDefault()?.Price.ToString("N0") VNĐ
+            </p>
+
+            <!-- Kích cỡ -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Size:</label>
+                <select class="form-select w-auto d-inline-block">
+                    @foreach (var detail in Model.ProductDetails)
+                    {
+                        <option>@detail.Size</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Màu sắc -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Color:</label>
+                <div>
+                    @foreach (var detail in Model.ProductDetails)
+                    {
+                        <span class="badge rounded-circle me-2"
+                              style="background-color:@detail.Color; width:24px; height:24px; display:inline-block;"></span>
+                    }
+                </div>
+            </div>
+
+            <!-- Nút thêm vào giỏ -->
+            <a asp-controller="Customers"
+               asp-action="AddToCart"
+               asp-route-id="@Model.ProductDetails.FirstOrDefault()?.ProductDetailId"
+               class="btn btn-primary btn-lg mt-3">
+                <i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ
+            </a>
+
+            <!-- Mô tả -->
+            <div class="mt-4">
+                <h5>Mô tả sản phẩm</h5>
+                <p>@Model.Description</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sản phẩm liên quan -->
+    <div class="mt-5">
+        <h4>Sản phẩm liên quan</h4>
+        <div class="row g-4 mt-2">
+            @foreach (var item in (List<SportStore.Models.Product>)ViewBag.RelatedProducts)
+            {
+                var detail = item.ProductDetails.FirstOrDefault();
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card h-100 shadow-sm">
+                        <img src="~/images/@(item.Img ?? "default.png")" class="card-img-top" style="height:200px; object-fit:cover;" alt="@item.FullName">
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title mb-1 text-truncate" title="@item.FullName">@item.FullName</h6>
+                            <p class="text-muted small mb-2">@item.Brand</p>
+                            <p class="fw-bold text-primary mb-2">@detail?.Price.ToString("N0") ?? "0" VNĐ</p>
+                            <a asp-action="ProductDetail" asp-route-id="@item.ProductId" class="btn btn-outline-primary mt-auto">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

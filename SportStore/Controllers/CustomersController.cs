@@ -44,7 +44,6 @@ namespace SportStore.Controllers
             var settings = new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                // Hoặc dùng: PreserveReferencesHandling = PreserveReferencesHandling.Objects
             };
 
             string jsoncart = JsonConvert.SerializeObject(list, settings);
@@ -172,7 +171,7 @@ namespace SportStore.Controllers
             {
                 InvoiceCode = invCode,
                 InvoiceDate = DateOnly.FromDateTime(DateTime.Now),
-                InvoiceStatus = 1,
+                InvoiceStatus = 0,
                 CustomerId = customerId,
                 EmployeeId = null,
             };
