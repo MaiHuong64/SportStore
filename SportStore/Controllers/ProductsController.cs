@@ -111,9 +111,6 @@ namespace SportStore.Controllers
             return View(product);
         }
 
-        // POST: Products/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, IFormFile? ImgFile, [Bind("ProductId,ProductCode,FullName,Description,Brand,CategoryId,SupplierId")] Product product)
@@ -124,25 +121,26 @@ namespace SportStore.Controllers
                 return NotFound();
             }
 
+            ModelState.Remove("Category");
+            ModelState.Remove("Supplier");
+            ModelState.Remove("ProductDetails");
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // Lấy product hiện tại từ DB
                     var existingProduct = await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.ProductId == id);
                     if (existingProduct == null)
                     {
                         return NotFound();
                     }
 
-                    // Xử lý upload ảnh mới nếu có
                     if (ImgFile != null && ImgFile.Length > 0)
                     {
                         product.Img = Upload(ImgFile);
                     }
                     else
                     {
-                        // Giữ nguyên ảnh cũ
                         product.Img = existingProduct.Img;
                     }
 
@@ -163,16 +161,6 @@ namespace SportStore.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Debug: In ra lỗi ModelState
-            foreach (var modelState in ModelState.Values)
-            {
-                foreach (var error in modelState.Errors)
-                {
-                    System.Diagnostics.Debug.WriteLine($"ModelState Error: {error.ErrorMessage}");
-                }
-            }
-
-            // Giữ ảnh cũ khi validation fail
             var currentProduct = await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.ProductId == id);
             if (currentProduct != null && string.IsNullOrEmpty(product.Img))
             {
