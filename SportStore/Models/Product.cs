@@ -36,8 +36,8 @@ public partial class Product
 
     [Column("SupplierID")]
     public int? SupplierId { get; set; }
-
-    [StringLength(30)]
+    
+    [MaxLength(255)]
     [Unicode(false)]
     [Display(Name = "Hình ảnh")]
     public string? Img { get; set; }

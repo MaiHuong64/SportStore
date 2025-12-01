@@ -4,7 +4,6 @@
 }
 
 <div class="container mt-4">
-    <!-- Header with warning icon -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex align-items-center">
@@ -18,15 +17,13 @@
             </div>
         </div>
     </div>
-
-    <!-- Invoice Information Card -->
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-danger text-white">
             <h5 class="mb-0"><i class="fas fa-file-invoice me-2"></i>Thông Tin Hóa Đơn</h5>
         </div>
         <div class="card-body">
             <div class="row">
-                <!-- Left Column -->
+
                 <div class="col-md-6">
                     <div class="mb-3">
                         <label class="text-muted small">Mã Hóa Đơn</label>
@@ -100,7 +97,7 @@
                                 }
                                 @foreach (var detail in Model.InvoiceDetails)
                                 {
-                                    decimal price = detail.Quantity ?? 0; 
+                                    decimal price = detail.UnitPrice ?? 0; 
                                    
                                     decimal subtotal = (detail.Quantity ?? 0) * price ;
                                     total += subtotal;
