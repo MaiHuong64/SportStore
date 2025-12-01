@@ -116,7 +116,7 @@ namespace SportStore.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductId,ProductCode,FullName,Description,Brand,CategoryId,SupplierId,Img")] Product product)
+        public async Task<IActionResult> Edit(int id, IFormFile? ImgFile, [Bind("ProductId,ProductCode,FullName,Description,Brand,CategoryId,SupplierId")] Product product)
         {
             GetData();
             if (id != product.ProductId)
@@ -128,6 +128,24 @@ namespace SportStore.Controllers
             {
                 try
                 {
+                    // Lấy product hiện tại từ DB
+                    var existingProduct = await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.ProductId == id);
+                    if (existingProduct == null)
+                    {
+                        return NotFound();
+                    }
+
+                    // Xử lý upload ảnh mới nếu có
+                    if (ImgFile != null && ImgFile.Length > 0)
+                    {
+                        product.Img = Upload(ImgFile);
+                    }
+                    else
+                    {
+                        // Giữ nguyên ảnh cũ
+                        product.Img = existingProduct.Img;
+                    }
+
                     _context.Update(product);
                     await _context.SaveChangesAsync();
                 }
@@ -144,8 +162,23 @@ namespace SportStore.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryId", product.CategoryId);
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "SupplierId", product.SupplierId);
+
+            // Debug: In ra lỗi ModelState
+            foreach (var modelState in ModelState.Values)
+            {
+                foreach (var error in modelState.Errors)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ModelState Error: {error.ErrorMessage}");
+                }
+            }
+
+            // Giữ ảnh cũ khi validation fail
+            var currentProduct = await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.ProductId == id);
+            if (currentProduct != null && string.IsNullOrEmpty(product.Img))
+            {
+                product.Img = currentProduct.Img;
+            }
+
             return View(product);
         }
 

@@ -149,8 +149,8 @@ namespace SportStore.Controllers
         // GET: Accounts/Create
         public IActionResult Create()
         {
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId");
-            ViewData["EmployeeId"] = new SelectList(_context.Employees, "EmployeeId", "EmployeeId");
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "FullName");
+            ViewData["EmployeeId"] = new SelectList(_context.Employees, "EmployeeId", "FullName");
             return View();
         }
 
