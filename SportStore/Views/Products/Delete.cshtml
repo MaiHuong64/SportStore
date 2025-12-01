@@ -34,7 +34,7 @@
                                  alt="@Model.FullName"
                                  class="img-fluid rounded shadow-sm"
                                  style="max-height: 250px; object-fit: cover;"
-                                 onerror="this.src='/images/no-image.png'" />
+                                 onerror="this.style.display='none'; this.parentElement.innerHTML='<p class=text-muted>Chưa có ảnh</p>'" />
                         </div>
 
                         <!-- Details Column -->
@@ -66,7 +66,7 @@
                                 </dt>
                                 <dd class="col-sm-8">
                                     <span class="badge bg-info text-dark">
-                                        @(Model.Category?.CategoryId ?? null)
+                                        @(Model.Category?.FullName ?? "Chưa cập nhật")
                                     </span>
                                 </dd>
 
@@ -75,7 +75,7 @@
                                 </dt>
                                 <dd class="col-sm-8">
                                     <span class="badge bg-success">
-                                        @(Model.Supplier?.SupplierId ?? null)
+                                        @(Model.Supplier?.SupplierName ?? "Chưa cập nhật")
                                     </span>
                                 </dd>
 

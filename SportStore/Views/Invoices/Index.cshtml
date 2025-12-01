@@ -28,19 +28,19 @@
                                 <tr>
                                     <th class="px-4 py-3">
                                         <i class="bi bi-hash me-1"></i>
-                                        @Html.DisplayNameFor(model => model.InvoiceCode)
+                                        Mã hóa đơn
                                     </th>
                                     <th class="py-3">
                                         <i class="bi bi-calendar-event me-1"></i>
-                                        @Html.DisplayNameFor(model => model.InvoiceDate)
+                                        Ngày lập
                                     </th>
                                     <th class="py-3">
                                         <i class="bi bi-person me-1"></i>
-                                        @Html.DisplayNameFor(model => model.Customer)
+                                        Khách hàng
                                     </th>
                                     <th class="py-3">
                                         <i class="bi bi-person-badge me-1"></i>
-                                        @Html.DisplayNameFor(model => model.Employee)
+                                        Nhân viên lập
                                     </th>
                                     <th class="py-3">
                                         <i class="bi bi-check-circle me-1"></i>
@@ -63,12 +63,12 @@
                                             </td>
                                             <td>
                                                 <span class="badge bg-info-subtle text-info">
-                                                    @Html.DisplayFor(modelItem => item.Customer.CustomerId)
+                                                    @Html.DisplayFor(modelItem => item.Customer.FullName)
                                                 </span>
                                             </td>
                                             <td>
                                                 <span class="badge bg-secondary-subtle text-secondary">
-                                                    @Html.DisplayFor(modelItem => item.Employee.EmployeeId)
+                                                    @Html.DisplayFor(modelItem => item.Employee.FullName)
                                                 </span>
                                             </td>
                                             <td>

@@ -94,13 +94,26 @@ namespace SportStore.Controllers
             return View(product);
         }
 
-   
-        // POST: Products/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // GET: Products/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            GetData();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            return View(product);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductId,ProductCode,FullName,Description,Brand,CategoryId,SupplierId,Img")] Product product)
+        public async Task<IActionResult> Edit(int id, IFormFile? ImgFile, [Bind("ProductId,ProductCode,FullName,Description,Brand,CategoryId,SupplierId")] Product product)
         {
             GetData();
             if (id != product.ProductId)
@@ -108,10 +121,29 @@ namespace SportStore.Controllers
                 return NotFound();
             }
 
+            ModelState.Remove("Category");
+            ModelState.Remove("Supplier");
+            ModelState.Remove("ProductDetails");
+
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var existingProduct = await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.ProductId == id);
+                    if (existingProduct == null)
+                    {
+                        return NotFound();
+                    }
+
+                    if (ImgFile != null && ImgFile.Length > 0)
+                    {
+                        product.Img = Upload(ImgFile);
+                    }
+                    else
+                    {
+                        product.Img = existingProduct.Img;
+                    }
+
                     _context.Update(product);
                     await _context.SaveChangesAsync();
                 }
@@ -128,8 +160,13 @@ namespace SportStore.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryId", product.CategoryId);
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "SupplierId", product.SupplierId);
+
+            var currentProduct = await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.ProductId == id);
+            if (currentProduct != null && string.IsNullOrEmpty(product.Img))
+            {
+                product.Img = currentProduct.Img;
+            }
+
             return View(product);
         }
 
