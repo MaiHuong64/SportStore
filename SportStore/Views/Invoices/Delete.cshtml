@@ -1,46 +1,159 @@
 ﻿@model SportStore.Models.Invoice
-
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Xóa Hóa Đơn";
 }
 
-<h1>Delete</h1>
+<div class="container mt-4">
+    <!-- Header with warning icon -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center">
+                <div class="text-danger me-3">
+                    <i class="fas fa-exclamation-triangle fa-3x"></i>
+                </div>
+                <div>
+                    <h2 class="mb-1">Xác Nhận Xóa Hóa Đơn</h2>
+                    <p class="text-muted mb-0">Bạn có chắc chắn muốn xóa hóa đơn này? Hành động này không thể hoàn tác.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Invoice</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.InvoiceCode)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.InvoiceCode)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.InvoiceDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.InvoiceDate)
-        </dd>
-       
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Customer)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Customer.CustomerId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Employee)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Employee.EmployeeId)
-        </dd>
-    </dl>
-    
+    <!-- Invoice Information Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0"><i class="fas fa-file-invoice me-2"></i>Thông Tin Hóa Đơn</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Left Column -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="text-muted small">Mã Hóa Đơn</label>
+                        <div class="fw-bold fs-5 text-primary">@Model.InvoiceCode</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small">Ngày Lập</label>
+                        <div class="fw-semibold">
+                            <i class="fas fa-calendar-alt me-2 text-muted"></i>
+                            @Model.InvoiceDate
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="text-muted small">Khách Hàng</label>
+                        <div class="fw-semibold">
+                            <i class="fas fa-user me-2 text-muted"></i>
+                            @if (Model.Customer != null)
+                            {
+                                <span>@Model.Customer.FullName</span>
+                                @* <small class="text-muted d-block ms-4">Mã KH: @Model.Customer.CustomerId</small> *@
+                            }
+                            else
+                            {
+                                <span class="text-muted">Không xác định</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small">Nhân Viên</label>
+                        <div class="fw-semibold">
+                            <i class="fas fa-user-tie me-2 text-muted"></i>
+                            @if (Model.Employee != null)
+                            {
+                                <span>@Model.Employee.FullName</span>
+                                @* <small class="text-muted d-block ms-4">Mã NV: @Model.Employee.EmployeeId</small> *@
+                            }
+                            else
+                            {
+                                <span class="text-muted">Không xác định</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice Details Section -->
+            @if (Model.InvoiceDetails != null && Model.InvoiceDetails.Any())
+            {
+                <hr class="my-4">
+                <div class="mb-3">
+                    <label class="text-muted small mb-2">Chi Tiết Hóa Đơn</label>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Sản Phẩm</th>
+                                    <th class="text-end">Số Lượng</th>
+                                    <th class="text-end">Đơn Giá</th>
+                                    <th class="text-end">Thành Tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int index = 1;
+                                    decimal total = 0;
+                                }
+                                @foreach (var detail in Model.InvoiceDetails)
+                                {
+                                    decimal price = detail.Quantity ?? 0; 
+                                   
+                                    decimal subtotal = (detail.Quantity ?? 0) * price ;
+                                    total += subtotal;
+                                    <tr>
+                                        <td>@index</td>
+                                        <td>
+                                            @if (detail.Product != null)
+                                            {
+                                                <span>@detail.Product.FullName</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Sản phẩm #@detail.ProductId</span>
+                                            }
+                                        </td>
+                                        <td class="text-end">@detail.Quantity</td>
+                                        <td class="text-end">@price.ToString("N0")đ </td>
+                                        <td class="text-end fw-semibold">@subtotal.ToString("N0") đ</td>
+                                    </tr>
+                                    index++;
+                                }
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="4" class="text-end fw-bold">Tổng Cộng:</td>
+                                    <td class="text-end fw-bold text-danger fs-5">@total.ToString("N0") đ</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+        <i class="fas fa-info-circle fa-2x me-3"></i>
+        <div>
+            <strong>Lưu ý:</strong> Việc xóa hóa đơn sẽ xóa toàn bộ thông tin bao gồm chi tiết sản phẩm.
+            Dữ liệu không thể khôi phục sau khi xóa.
+        </div>
+    </div>
+
+
     <form asp-action="Delete">
-        <input type="hidden" asp-for="InvoiceId" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        <input type="hidden" asp-for="CustomerId" />
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-danger">
+                <i class="bi bi-trash"></i> Xác Nhận Xóa
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-x-circle"></i> Hủy
+            </a>
+        </div>
     </form>
 </div>
