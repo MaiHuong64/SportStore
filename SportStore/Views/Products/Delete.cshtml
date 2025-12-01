@@ -66,7 +66,7 @@
                                 </dt>
                                 <dd class="col-sm-8">
                                     <span class="badge bg-info text-dark">
-                                        @(Model.Category?.CategoryId ?? null)
+                                        @(Model.Category?.FullName ?? "Chưa cập nhật")
                                     </span>
                                 </dd>
 
@@ -75,7 +75,7 @@
                                 </dt>
                                 <dd class="col-sm-8">
                                     <span class="badge bg-success">
-                                        @(Model.Supplier?.SupplierId ?? null)
+                                        @(Model.Supplier?.SupplierName ?? "Chưa cập nhật")
                                     </span>
                                 </dd>
 

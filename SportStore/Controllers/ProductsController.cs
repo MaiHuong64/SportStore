@@ -94,7 +94,23 @@ namespace SportStore.Controllers
             return View(product);
         }
 
-   
+        // GET: Products/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            GetData();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            return View(product);
+        }
+
         // POST: Products/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
