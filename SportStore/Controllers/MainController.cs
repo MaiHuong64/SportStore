@@ -18,11 +18,35 @@ namespace SportStore.Controllers
         {
             _context = context;
         }
+
+        public void GetDataCategories()
+        {
+            ViewBag.category = _context.Categories.ToList();
+        }
+
+
+
         // GET: Main
         public async Task<IActionResult> Index()
         {
+            GetDataCategories();
             var applicationDbContext = _context.Products.Include(p => p.Category).Include(p => p.Supplier).Include(p => p.ProductDetails);
             return View(await applicationDbContext.ToListAsync());
+        }
+
+        public async Task<IActionResult> SearchByCaterogy(int? CategoryId)
+        {
+            GetDataCategories();
+
+            var products = _context.Products
+                                   .Include(p => p.Category)
+                                   .Include(p => p.Supplier)
+                                   .Include(p => p.ProductDetails)
+                                    .Where(p => p.CategoryId == CategoryId);
+
+
+
+            return View(await products.ToListAsync());
         }
 
         // GET: Main/Details/5
@@ -53,9 +77,47 @@ namespace SportStore.Controllers
         public async Task<IActionResult> Search(string keyword)
         {
             GetData();
+
+            ViewBag.SearchKeyword = keyword;
             var applicationDbContext = _context.Products.Where(p => p.FullName.Contains(keyword) || p.Brand.Contains(keyword));
             return View(await applicationDbContext.ToListAsync());
         }
-        //public async Task<IActionResult> Brand
+        public async Task<IActionResult> MyOrders()
+        {
+            int? customerId = HttpContext.Session.GetInt32("CustomerId");
+            if (customerId == 0)
+            {
+                return RedirectToAction("Login", "Customers");
+            }
+            var orders = await _context.Invoices
+                .Include(i => i.InvoiceDetails)
+                .ThenInclude(d => d.Product)
+                .Where(i => i.CustomerId == customerId)
+                .OrderByDescending(i => i.InvoiceDate)
+                .ToListAsync();
+
+            return View(orders);
+        }
+        public async Task<IActionResult> MyOrderDetails(int id)
+        {
+            int? customerId = HttpContext.Session.GetInt32("CustomerId");
+
+            if (!customerId.HasValue)
+            {
+                return RedirectToAction("Login", "Accounts");
+            }
+
+            var invoice = await _context.Invoices
+                .Include(i => i.InvoiceDetails)
+                    .ThenInclude(d => d.Product)
+                .FirstOrDefaultAsync(i => i.InvoiceId == id && i.CustomerId == customerId.Value);
+
+            if (invoice == null)
+            {
+                return NotFound();
+            }
+
+            return View(invoice);
+        }
     }
 }

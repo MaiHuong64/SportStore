@@ -1,0 +1,32 @@
+﻿@model IEnumerable<SportStore.Models.Invoice>
+
+<h2 class="mb-4">Đơn hàng của tôi</h2>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped table-hover align-middle">
+        <thead class="table-dark text-center">
+            <tr>
+                <th>Mã đơn</th>
+                <th>Ngày</th>
+                <th>Tổng tiền</th>
+                <th>Chi tiết</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                var totalAmount = order.InvoiceDetails.Sum(d => (d.UnitPrice ?? 0) * (d.Quantity ?? 0));
+                <tr>
+                    <td class="text-center">@order.InvoiceId</td>
+                    <td class="text-center">@order.InvoiceDate</td>
+                    <td class="text-end">@totalAmount.ToString("N0") đ</td>
+                    <td class="text-center">
+                        <a asp-controller="Main" asp-action="MyOrderDetails" asp-route-id="@order.InvoiceId" class="btn btn-sm btn-outline-primary">
+                            Xem chi tiết
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
