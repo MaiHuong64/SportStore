@@ -1,55 +1,158 @@
 ﻿@model IEnumerable<SportStore.Models.Invoice>
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Quản lý hóa đơn";
 }
 
-<h1>Index</h1>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="fw-bold mb-0">
+                    <i class="bi bi-receipt-cutoff me-2"></i>Quản lý hóa đơn
+                </h2>
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>Tạo hóa đơn mới
+                </a>
+            </div>
+        </div>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.InvoiceCode)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.InvoiceDate)
-            </th>
-            
-            <th>
-                @Html.DisplayNameFor(model => model.Customer)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Employee)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.InvoiceCode)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.InvoiceDate)
-            </td>
-           
-            <td>
-                @Html.DisplayFor(modelItem => item.Customer.CustomerId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Employee.EmployeeId)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.InvoiceId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.InvoiceId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.InvoiceId">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="px-4 py-3">
+                                        <i class="bi bi-hash me-1"></i>
+                                        @Html.DisplayNameFor(model => model.InvoiceCode)
+                                    </th>
+                                    <th class="py-3">
+                                        <i class="bi bi-calendar-event me-1"></i>
+                                        @Html.DisplayNameFor(model => model.InvoiceDate)
+                                    </th>
+                                    <th class="py-3">
+                                        <i class="bi bi-person me-1"></i>
+                                        @Html.DisplayNameFor(model => model.Customer)
+                                    </th>
+                                    <th class="py-3">
+                                        <i class="bi bi-person-badge me-1"></i>
+                                        @Html.DisplayNameFor(model => model.Employee)
+                                    </th>
+                                    <th class="py-3">
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        Trạng thái
+                                    </th>
+                                    <th class="text-center py-3">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.Any())
+                                {
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td class="px-4 fw-semibold">
+                                                @Html.DisplayFor(modelItem => item.InvoiceCode)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.InvoiceDate)
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info-subtle text-info">
+                                                    @Html.DisplayFor(modelItem => item.Customer.CustomerId)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary-subtle text-secondary">
+                                                    @Html.DisplayFor(modelItem => item.Employee.EmployeeId)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var statusValue = (int)item.InvoiceStatus;
+                                                    string badgeClass = "";
+                                                    string icon = "";
+                                                    string text = "";
+
+                                                    switch (statusValue)
+                                                    {
+                                                        case 0: // Chờ xử lý
+                                                            badgeClass = "bg-warning-subtle text-warning";
+                                                            icon = "bi-clock-fill";
+                                                            text = "Chờ xử lý";
+                                                            break;
+                                                        case 1: // Đã xác nhận
+                                                            badgeClass = "bg-info-subtle text-info";
+                                                            icon = "bi-check-circle-fill";
+                                                            text = "Đã xác nhận";
+                                                            break;
+                                                        case 2: // Đang xử lý
+                                                            badgeClass = "bg-primary-subtle text-primary";
+                                                            icon = "bi-arrow-repeat";
+                                                            text = "Đang xử lý";
+                                                            break;
+                                                        case 3: // Đang giao hàng
+                                                            badgeClass = "bg-secondary-subtle text-secondary";
+                                                            icon = "bi-truck";
+                                                            text = "Đang giao hàng";
+                                                            break;
+                                                        case 4: // Hoàn thành
+                                                            badgeClass = "bg-success-subtle text-success";
+                                                            icon = "bi-check-circle-fill";
+                                                            text = "Hoàn thành";
+                                                            break;
+                                                        case 5: // Đã hủy
+                                                            badgeClass = "bg-danger-subtle text-danger";
+                                                            icon = "bi-x-circle-fill";
+                                                            text = "Đã hủy";
+                                                            break;
+                                                        default:
+                                                            badgeClass = "bg-secondary-subtle text-secondary";
+                                                            icon = "bi-question-circle-fill";
+                                                            text = "Không xác định";
+                                                            break;
+                                                    }
+                                                }
+                                                <span class="badge @badgeClass">
+                                                    <i class="bi @icon me-1"></i>@text
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a asp-action="Details" asp-route-id="@item.InvoiceId"
+                                                       class="btn btn-outline-info" title="Chi tiết">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a asp-action="Edit" asp-route-id="@item.InvoiceId"
+                                                       class="btn btn-outline-primary" title="Sửa">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <a asp-action="Delete" asp-route-id="@item.InvoiceId"
+                                                       class="btn btn-outline-danger" title="Xóa">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5 text-muted">
+                                            <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                                            <p class="mb-0">Chưa có hóa đơn nào</p>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

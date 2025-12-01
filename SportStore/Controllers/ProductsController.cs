@@ -34,6 +34,12 @@ namespace SportStore.Controllers
             return uploadFileName;
         }
 
+        public void GetData()
+        {
+            ViewBag.CategoryId = new SelectList(_context.Categories.ToList(), "CategoryId", "FullName");
+            ViewBag.SupplierId = new SelectList(_context.Suppliers.ToList(), "SupplierId", "FullName");
+        }
+
         // GET: Products
         public async Task<IActionResult> Index()
         {

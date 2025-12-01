@@ -235,6 +235,8 @@ namespace SportStore.Controllers
             ModelState.Remove("InvoiceDetails");
             ModelState.Remove("Customer");
             ModelState.Remove("Employee");
+            ModelState.Remove("InvoiceStatus");
+            ModelState.Remove("inv.InvoiceStatus");
 
             if (!ModelState.IsValid)
             {
@@ -259,13 +261,17 @@ namespace SportStore.Controllers
                     .Include(i => i.InvoiceDetails)
                     .ThenInclude(d => d.Product)
                     .FirstOrDefaultAsync(i => i.InvoiceId == id);
+
                 if (existingInvoice == null)
                     return NotFound();
 
+                System.Diagnostics.Debug.WriteLine($"Status CŨ: {existingInvoice.InvoiceStatus}");
+                System.Diagnostics.Debug.WriteLine($"Status MỚI: {invoice.InvoiceStatus}");
+
                 existingInvoice.InvoiceDate = invoice.InvoiceDate;
-                existingInvoice.InvoiceStatus = invoice.InvoiceStatus;
+                existingInvoice.InvoiceStatus = invoice.InvoiceStatus ?? existingInvoice.InvoiceStatus;
 
-
+                System.Diagnostics.Debug.WriteLine($"Status SAU KHI GÁN: {existingInvoice.InvoiceStatus}");
                 foreach (var detail in invoiceDetails)
                 {
                     var exist = existingInvoice.InvoiceDetails
@@ -339,12 +345,16 @@ namespace SportStore.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var invoice = await _context.Invoices.FindAsync(id);
+            var invoice = await _context.Invoices
+                .Include(i => i.InvoiceDetails)
+                .FirstOrDefaultAsync(i => i.InvoiceId == id);
             if (invoice != null)
             {
+                _context.InvoiceDetails.RemoveRange(invoice.InvoiceDetails);
                 _context.Invoices.Remove(invoice);
             }
 
+            TempData["Success"] = "Xóa hóa đơn thành công.";
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

@@ -1,64 +1,190 @@
 ﻿@model SportStore.Models.Product
-
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Chỉnh Sửa Sản Phẩm";
 }
 
-<h1>Edit</h1>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <div class="mb-3">
+                    <i class="bi bi-pencil-square text-primary" style="font-size: 3rem;"></i>
+                </div>
+                <h2 class="fw-bold">Chỉnh Sửa Sản Phẩm</h2>
+                <p class="text-muted">Cập nhật thông tin sản phẩm của bạn</p>
+            </div>
 
-<h4>Product</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="ProductId" />
-            <div class="form-group">
-                <label asp-for="ProductCode" class="control-label"></label>
-                <input asp-for="ProductCode" class="form-control" />
-                <span asp-validation-for="ProductCode" class="text-danger"></span>
+            <!-- Main Card -->
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <form asp-action="Edit" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                        <input type="hidden" asp-for="ProductId" />
+
+                        <div class="row">
+                            <!-- Left Column: Form Fields -->
+                            <div class="col-lg-8">
+                                <!-- Thông tin cơ bản -->
+                                <h5 class="mb-3 text-primary">
+                                    <i class="bi bi-info-circle me-2"></i>Thông tin cơ bản
+                                </h5>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label asp-for="ProductCode" class="form-label fw-semibold">
+                                            Mã Sản Phẩm <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-upc"></i></span>
+                                            <input asp-for="ProductCode" class="form-control" />
+                                        </div>
+                                        <span asp-validation-for="ProductCode" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label asp-for="Brand" class="form-label fw-semibold">Thương Hiệu</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-award"></i></span>
+                                            <input asp-for="Brand" class="form-control" />
+                                        </div>
+                                        <span asp-validation-for="Brand" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label asp-for="FullName" class="form-label fw-semibold">
+                                            Tên Sản Phẩm <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                                            <input asp-for="FullName" class="form-control" />
+                                        </div>
+                                        <span asp-validation-for="FullName" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label asp-for="Description" class="form-label fw-semibold">Mô Tả</label>
+                                        <textarea asp-for="Description" class="form-control" rows="4"
+                                                  placeholder="Mô tả chi tiết về sản phẩm..."></textarea>
+                                        <span asp-validation-for="Description" class="text-danger small"></span>
+                                    </div>
+                                </div>
+
+                                <hr class="my-4" />
+
+                                <!-- Phân loại -->
+                                <h5 class="mb-3 text-primary">
+                                    <i class="bi bi-grid me-2"></i>Phân loại sản phẩm
+                                </h5>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label asp-for="CategoryId" class="form-label fw-semibold">
+                                            Danh Mục <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-folder"></i></span>
+                                            <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.CategoryId">
+                                                <option value="">-- Chọn danh mục --</option>
+                                            </select>
+                                        </div>
+                                        <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label asp-for="SupplierId" class="form-label fw-semibold">
+                                            Nhà Cung Cấp <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-truck"></i></span>
+                                            <select asp-for="SupplierId" class="form-select" asp-items="ViewBag.SupplierId">
+                                                <option value="">-- Chọn nhà cung cấp --</option>
+                                            </select>
+                                        </div>
+                                        <span asp-validation-for="SupplierId" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column: Image Upload & Preview -->
+                            <div class="col-lg-4">
+                                <h5 class="mb-3 text-primary">
+                                    <i class="bi bi-image me-2"></i>Hình ảnh
+                                </h5>
+
+                                <!-- Current Image Preview -->
+                                <div class="card bg-light mb-3">
+                                    <div class="card-body text-center">
+                                        <p class="small text-muted mb-2">Hình ảnh hiện tại:</p>
+                                        <img id="currentImage"
+                                             src="~/images/@Model.Img"
+                                             alt="Current Product"
+                                             class="img-fluid rounded shadow-sm mb-2"
+                                             style="max-height: 200px; object-fit: contain;"
+                                             onerror="this.src='/images/no-image.png'" />
+                                        <div class="small text-muted">@Model.Img</div>
+                                    </div>
+                                </div>
+
+                                <!-- Upload New Image -->
+                                <div class="mb-3">
+                                    <label asp-for="Img" class="form-label fw-semibold">
+                                        Cập nhật hình ảnh mới
+                                    </label>
+                                    <input type="file"
+                                           asp-for="Img"
+                                           class="form-control"
+                                           id="imageInput"
+                                           accept="image/*"
+                                           onchange="previewNewImage(event)" />
+                                    <span asp-validation-for="Img" class="text-danger small"></span>
+                                    <div class="form-text">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Để trống nếu không đổi ảnh
+                                    </div>
+                                </div>
+
+                                <!-- New Image Preview -->
+                                <div id="newImagePreview" class="card bg-light" style="display:none;">
+                                    <div class="card-body text-center">
+                                        <p class="small text-success mb-2">
+                                            <i class="bi bi-check-circle me-1"></i>Ảnh mới:
+                                        </p>
+                                        <img id="previewImg"
+                                             src=""
+                                             alt="New Preview"
+                                             class="img-fluid rounded shadow-sm mb-2"
+                                             style="max-height: 200px; object-fit: contain;" />
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                onclick="clearNewImage()">
+                                            <i class="bi bi-x-circle me-1"></i>Hủy ảnh mới
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4">
+                                <i class="bi bi-arrow-left me-1"></i>Quay Lại
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check-lg me-1"></i>Lưu Thay Đổi
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="FullName" class="control-label"></label>
-                <input asp-for="FullName" class="form-control" />
-                <span asp-validation-for="FullName" class="text-danger"></span>
+
+            <!-- Helper Text -->
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    <i class="bi bi-asterisk text-danger" style="font-size: 0.5rem;"></i>
+                    Các trường đánh dấu (*) là bắt buộc
+                </small>
             </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Brand" class="control-label"></label>
-                <input asp-for="Brand" class="form-control" />
-                <span asp-validation-for="Brand" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CategoryId" class="control-label"></label>
-                <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryId"></select>
-                <span asp-validation-for="CategoryId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="SupplierId" class="control-label"></label>
-                <select asp-for="SupplierId" class="form-control" asp-items="ViewBag.SupplierId"></select>
-                <span asp-validation-for="SupplierId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Img" class="control-label"></label>
-                <input asp-for="Img" class="form-control" />
-                <span asp-validation-for="Img" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
