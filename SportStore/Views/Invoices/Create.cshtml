@@ -1,47 +1,255 @@
 ﻿@model SportStore.Models.Invoice
-
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Tạo hóa đơn";
 }
 
-<h1>Create</h1>
-
-<h4>Invoice</h4>
+<h1>Tạo hóa đơn mới</h1>
 <hr />
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["SuccessMessage"]
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+}
+
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
+    <div class="col-md-12">
+        <form asp-action="Create" method="post" id="invoiceForm">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="InvoiceCode" class="control-label"></label>
-                <input asp-for="InvoiceCode" class="form-control" />
-                <span asp-validation-for="InvoiceCode" class="text-danger"></span>
+
+            <!-- Thông tin hóa đơn -->
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Thông tin hóa đơn</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="InvoiceCode" class="control-label">Mã hóa đơn</label>
+                                <input asp-for="InvoiceCode" class="form-control" readonly />
+                                <span asp-validation-for="InvoiceCode" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="InvoiceDate" class="control-label">Ngày lập</label>
+                                <input asp-for="InvoiceDate" type="date" class="form-control" />
+                                <span asp-validation-for="InvoiceDate" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="CustomerId" class="control-label">Khách hàng</label>
+                                <select asp-for="CustomerId" class="form-control" asp-items="ViewBag.CustomerId">
+                                    <option value="">-- Chọn khách hàng --</option>
+                                </select>
+                                <span asp-validation-for="CustomerId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="EmployeeId" class="control-label">Nhân viên</label>
+                                <input type="hidden" asp-for="EmployeeId" value="@ViewBag.EmployeeId" />
+                                <input type="text" value="@ViewBag.EmployeeName" class="form-control" readonly />
+                                <span asp-validation-for="EmployeeId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="InvoiceDate" class="control-label"></label>
-                <input asp-for="InvoiceDate" class="form-control" />
-                <span asp-validation-for="InvoiceDate" class="text-danger"></span>
+
+            <!-- Chi tiết hóa đơn -->
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Chi tiết hóa đơn</h5>
+                    <button type="button" class="btn btn-sm btn-light" onclick="addInvoiceDetail()">
+                        <i class="fas fa-plus"></i> Thêm sản phẩm
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" id="invoiceDetailsTable">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th width="5%">STT</th>
+                                    <th width="40%">Sản phẩm</th>
+                                    <th width="15%">Số lượng</th>
+                                    <th width="18%">Đơn giá</th>
+                                    <th width="18%">Thành tiền</th>
+                                    <th width="4%"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="invoiceDetailsBody">
+                                <!-- Rows will be added dynamically -->
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-info">
+                                    <td colspan="4" class="text-right font-weight-bold">Tổng cộng:</td>
+                                    <td colspan="2" class="font-weight-bold">
+                                        <span id="grandTotal">0</span> VNĐ
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
             </div>
-            
+
             <div class="form-group">
-                <label asp-for="CustomerId" class="control-label"></label>
-                <select asp-for="CustomerId" class ="form-control" asp-items="ViewBag.CustomerId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="EmployeeId" class="control-label"></label>
-                <select asp-for="EmployeeId" class ="form-control" asp-items="ViewBag.EmployeeId"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Tạo hóa đơn
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Hủy
+                </a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        let detailIndex = 0;
+        const products = @Html.Raw(ViewBag.Products);
+
+        function addInvoiceDetail() {
+            const tbody = document.getElementById('invoiceDetailsBody');
+            const row = document.createElement('tr');
+            row.id = `detail-row-${detailIndex}`;
+
+            // CHÚ Ý: Tên field phải là InvoiceDetails[index].PropertyName
+            row.innerHTML = `
+                <td class="text-center row-number">${detailIndex + 1}</td>
+                <td>
+                    <select name="InvoiceDetails[${detailIndex}].ProductId"
+                            class="form-control product-select"
+                            onchange="updatePrice(${detailIndex})"
+                            required>
+                        <option value="">-- Chọn sản phẩm --</option>
+                        ${products.map(p => `<option value="${p.productId}" data-price="${p.price}"> ${p.productName}</option>`).join('')}
+                    </select>
+                </td>
+                <td>
+                    <input type="number"
+                           name="InvoiceDetails[${detailIndex}].Quantity"
+                           class="form-control quantity-input text-right"
+                           min="1"
+                           value="1"
+                           onchange="calculateTotal(${detailIndex})"
+                           required />
+                </td>
+                <td>
+                    <input type="number"
+                           name="InvoiceDetails[${detailIndex}].UnitPrice"
+                           class="form-control unit-price text-right"
+                           step="0.01"
+                           min="0"
+                           readonly
+                           required />
+                </td>
+                <td class="text-right font-weight-bold line-total">0</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removeInvoiceDetail(${detailIndex})" title="Xóa">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+            detailIndex++;
+            updateRowNumbers();
+        }
+
+        function updatePrice(index) {
+            const row = document.getElementById(`detail-row-${index}`);
+            const select = row.querySelector('.product-select');
+            const priceInput = row.querySelector('.unit-price');
+
+            const selectedOption = select.options[select.selectedIndex];
+            const price = selectedOption.getAttribute('data-price') || 0;
+
+            priceInput.value = parseFloat(price).toFixed(2);
+            calculateTotal(index);
+        }
+
+        function calculateTotal(index) {
+            const row = document.getElementById(`detail-row-${index}`);
+            const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
+            const unitPrice = parseFloat(row.querySelector('.unit-price').value) || 0;
+            const total = quantity * unitPrice;
+
+            row.querySelector('.line-total').textContent = total.toLocaleString('vi-VN', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+            updateGrandTotal();
+        }
+
+        function removeInvoiceDetail(index) {
+            const row = document.getElementById(`detail-row-${index}`);
+            row.remove();
+            updateGrandTotal();
+            updateRowNumbers();
+        }
+
+        function updateGrandTotal() {
+            let grandTotal = 0;
+            document.querySelectorAll('.line-total').forEach(cell => {
+                const value = cell.textContent.replace(/\./g, '').replace(/,/g, '');
+                grandTotal += parseFloat(value) || 0;
+            });
+            document.getElementById('grandTotal').textContent = grandTotal.toLocaleString('vi-VN', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        }
+
+        function updateRowNumbers() {
+            const rows = document.querySelectorAll('#invoiceDetailsBody tr');
+            rows.forEach((row, index) => {
+                const numberCell = row.querySelector('.row-number');
+                if (numberCell) {
+                    numberCell.textContent = index + 1;
+                }
+            });
+        }
+
+        // Set ngày hiện tại và thêm dòng đầu tiên
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.querySelector('input[type="date"]');
+            if (dateInput) {
+                dateInput.value = today;
+            }
+            addInvoiceDetail();
+        });
+
+        // Validate form trước khi submit
+        document.getElementById('invoiceForm').addEventListener('submit', function(e) {
+            const detailRows = document.querySelectorAll('#invoiceDetailsBody tr');
+            if (detailRows.length === 0) {
+                e.preventDefault();
+                alert('Vui lòng thêm ít nhất một sản phẩm vào hóa đơn!');
+                return false;
+            }
+
+            // Kiểm tra có sản phẩm được chọn không
+            let hasValidProduct = false;
+            detailRows.forEach(row => {
+                const select = row.querySelector('.product-select');
+                if (select && select.value) {
+                    hasValidProduct = true;
+                }
+            });
+
+            if (!hasValidProduct) {
+                e.preventDefault();
+                alert('Vui lòng chọn sản phẩm cho hóa đơn!');
+                return false;
+            }
+        });
+    </script>
 }
