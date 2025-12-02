@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SportStore.Data;
 using SportStore.Models;
+using SportStore.ViewModels;
+using SportStore.Helpers;
 
 namespace SportStore.Controllers
 {
@@ -27,7 +29,7 @@ namespace SportStore.Controllers
                 var extension = Path.GetExtension(file.FileName);
                 var shortGuid = Guid.NewGuid().ToString("N").Substring(0, 8);
                 uploadFileName = shortGuid + extension;
-                var path = $"wwwroot\\images\\{uploadFileName}";
+                var path = Path.Combine("wwwroot", "images", uploadFileName);
                 using (var stream = new FileStream(path, FileMode.Create))
                 {
                     file.CopyTo(stream);
@@ -80,24 +82,12 @@ namespace SportStore.Controllers
             return View();
         }
 
-        // POST: Products/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        public class ProductVariant
-        {
-            public byte? Size { get; set; }
-            public string? Color { get; set; }
-            public decimal Price { get; set; }
-            public int? Quantity { get; set; }
-            public string? SKU { get; set; }
-        }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
             IFormFile Img,
             [Bind("ProductCode,FullName,Description,Brand,CategoryId,SupplierId")] Product product,
-            List<ProductVariant> Variants)
+            List<ProductVariantViewModel> Variants)
         {
             GetData();
 
@@ -134,7 +124,7 @@ namespace SportStore.Controllers
                             Size = variant.Size,
                             Color = variant.Color,
                             Sku = string.IsNullOrEmpty(variant.SKU)
-                                ? $"{product.ProductCode}-{variant.Size}-{variant.Color?.Replace(" ", "")}"
+                                ? SkuHelper.GenerateSku(product.ProductCode, variant.Size, variant.Color)
                                 : variant.SKU
                         };
 
@@ -220,10 +210,15 @@ namespace SportStore.Controllers
                         .Where(pd => pd.ProductId == id)
                         .ToListAsync();
 
+                    var detailsDict = existingDetails.ToDictionary(d => d.ProductDetailId);
+
+                    var submittedIds = ProductDetails?.Where(pd => pd.ProductDetailId > 0)
+                        .Select(pd => pd.ProductDetailId)
+                        .ToHashSet() ?? new HashSet<int>();
+
                     foreach (var existingDetail in existingDetails)
                     {
-                        var matchingDetail = ProductDetails?.FirstOrDefault(pd => pd.ProductDetailId == existingDetail.ProductDetailId);
-                        if (matchingDetail == null)
+                        if (!submittedIds.Contains(existingDetail.ProductDetailId))
                         {
                             _context.ProductDetails.Remove(existingDetail);
                         }
@@ -233,20 +228,16 @@ namespace SportStore.Controllers
                     {
                         foreach (var detail in ProductDetails)
                         {
-                            if (detail.ProductDetailId > 0)
+                            if (detail.ProductDetailId > 0 && detailsDict.TryGetValue(detail.ProductDetailId, out var existingDetail))
                             {
-                                var existingDetail = existingDetails.FirstOrDefault(ed => ed.ProductDetailId == detail.ProductDetailId);
-                                if (existingDetail != null)
-                                {
-                                    existingDetail.Size = detail.Size;
-                                    existingDetail.Color = detail.Color;
-                                    existingDetail.Price = detail.Price;
-                                    existingDetail.Quantity = detail.Quantity;
-                                    existingDetail.Sku = string.IsNullOrEmpty(detail.Sku)
-                                        ? $"{product.ProductCode}-{detail.Size}-{detail.Color?.Replace(" ", "")}"
-                                        : detail.Sku;
-                                    _context.ProductDetails.Update(existingDetail);
-                                }
+                                existingDetail.Size = detail.Size;
+                                existingDetail.Color = detail.Color;
+                                existingDetail.Price = detail.Price;
+                                existingDetail.Quantity = detail.Quantity;
+                                existingDetail.Sku = string.IsNullOrEmpty(detail.Sku)
+                                    ? SkuHelper.GenerateSku(product.ProductCode, detail.Size, detail.Color)
+                                    : detail.Sku;
+                                _context.ProductDetails.Update(existingDetail);
                             }
                             else
                             {
@@ -258,7 +249,7 @@ namespace SportStore.Controllers
                                     Price = detail.Price,
                                     Quantity = detail.Quantity,
                                     Sku = string.IsNullOrEmpty(detail.Sku)
-                                        ? $"{product.ProductCode}-{detail.Size}-{detail.Color?.Replace(" ", "")}"
+                                        ? SkuHelper.GenerateSku(product.ProductCode, detail.Size, detail.Color)
                                         : detail.Sku
                                 };
                                 _context.ProductDetails.Add(newDetail);
