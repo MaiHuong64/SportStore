@@ -217,7 +217,7 @@ namespace SportStore.Controllers
                 try
                 {
                     existAccount.PhoneNumber = account.PhoneNumber;
-                    existAccount.Password = _passwordHasher.HashPassword(existAccount, account.Password);
+                    //existAccount.Password = _passwordHasher.HashPassword(existAccount, account.Password);
                     existAccount.Role = account.Role;
                     existAccount.Status = account.Status;
                     existAccount.CustomerId = account.CustomerId;
