@@ -44,9 +44,7 @@ namespace SportStore.Controllers
                                    .Include(p => p.ProductDetails)
                                     .Where(p => p.CategoryId == CategoryId);
 
-
-
-            return View(await products.ToListAsync());
+            return View("Index", await products.ToListAsync());
         }
 
         // GET: Main/Details/5

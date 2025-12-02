@@ -101,39 +101,42 @@
         <div class="row g-4">
             @foreach (var item in Model)
             {
-                var detail = item.ProductDetails.FirstOrDefault();
-                <div class="col-lg-3 col-md-4 col-sm-6">
-                    <div class="card product-card h-100 shadow-sm">
-                       
-                        <a asp-controller="Main"
-                           asp-action="ProductDetail"
-                           asp-route-id="@item.ProductId"
-                           class="product-link">
-                            <div class="product-img-wrapper">
-                                <span class="product-badge">-30%</span>
-                                <img src="~/images/@item.Img"
-                                     class="product-img"
-                                     asp-append-version="true"
-                                     alt="@item.FullName" />
-                            </div>
-                            <div class="card-body">
-                                <h6 class="product-title">@item.FullName</h6>
-                                <p class="text-muted small mb-2">@item.Brand</p>
-                                <div class="product-price">@detail.Price.ToString("N0") VNĐ</div>
-                            </div>
-                        </a>
+                var detail = item.ProductDetails?.FirstOrDefault();
+                if (detail != null)
+                {
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="card product-card h-100 shadow-sm">
 
-                        <div class="card-body pt-0">
-                            <a class="btn btn-primary btn-add-cart"
-                               asp-controller="Customers"
-                               asp-action="AddToCart"
-                               asp-route-id="@detail.ProductDetailId"
-                               onclick="event.stopPropagation()">
-                                <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                            <a asp-controller="Main"
+                               asp-action="ProductDetail"
+                               asp-route-id="@item.ProductId"
+                               class="product-link">
+                                <div class="product-img-wrapper">
+                                    <span class="product-badge">-30%</span>
+                                    <img src="~/images/@item.Img"
+                                         class="product-img"
+                                         asp-append-version="true"
+                                         alt="@item.FullName" />
+                                </div>
+                                <div class="card-body">
+                                    <h6 class="product-title">@item.FullName</h6>
+                                    <p class="text-muted small mb-2">@item.Brand</p>
+                                    <div class="product-price">@detail.Price.ToString("N0") VNĐ</div>
+                                </div>
                             </a>
+
+                            <div class="card-body pt-0">
+                                <a class="btn btn-primary btn-add-cart"
+                                   asp-controller="Customers"
+                                   asp-action="AddToCart"
+                                   asp-route-id="@detail.ProductDetailId"
+                                   onclick="event.stopPropagation()">
+                                    <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
+                }
             }
         </div>
     </div>

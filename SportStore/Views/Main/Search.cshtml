@@ -139,55 +139,47 @@
         <div class="row g-4">
             @foreach (var item in Model)
             {
-                var detail = item.ProductDetails.FirstOrDefault();
-             
+                var detail = item.ProductDetails?.FirstOrDefault();
+                if (detail != null)
+                {
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="card product-card h-100 shadow-sm">
+                            <div class="product-img-wrapper position-relative">
+                                <span class="product-badge position-absolute top-0 start-0 m-2 badge bg-danger">
+                                    -30%
+                                </span>
 
-                <div class="col-lg-3 col-md-4 col-sm-6">
-                    <div class="card product-card h-100 shadow-sm">
-                        <div class="product-img-wrapper position-relative">
-                            <span class="product-badge position-absolute top-0 start-0 m-2 badge bg-danger">
-                                -30%
-                            </span>
+                                <button class="btn btn-quick-view" title="Xem nhanh">
+                                    <i class="bi bi-eye"></i>
+                                </button>
 
-                            <button class="btn btn-quick-view" title="Xem nhanh">
-                                <i class="bi bi-eye"></i>
-                            </button>
-
-                            <img src="~/images/@item.Img"
-                                 class="product-img card-img-top"
-                                 asp-append-version="true"
-                                 alt="@item.FullName"
-                                 style="height: 250px; object-fit: cover;" />
-                        </div>
-
-                        <div class="card-body d-flex flex-column">
-                            <p class="product-brand mb-1">@item.Brand</p>
-                            <h6 class="product-title mb-2">@item.FullName</h6>
-
-                          @*   <div class="rating-stars mb-2">
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill text-muted"></i>
-                                <span class="text-muted ms-1">(4.0)</span>
-                            </div> *@
-
-                            <div class="product-price fw-bold text-primary mb-3">
-                                @detail.Price.ToString("N0") VNĐ
+                                <img src="~/images/@item.Img"
+                                     class="product-img card-img-top"
+                                     asp-append-version="true"
+                                     alt="@item.FullName"
+                                     style="height: 250px; object-fit: cover;" />
                             </div>
 
-                            <div class="mt-auto">
-                                <a class="btn btn-primary btn-add-cart w-100"
-                                   asp-controller="Customers"
-                                   asp-action="AddToCart"
-                                   asp-route-id="@detail.ProductDetailId">
-                                    <i class="bi bi-cart-plus me-2"></i>Thêm vào giỏ
-                                </a>
+                            <div class="card-body d-flex flex-column">
+                                <p class="product-brand mb-1">@item.Brand</p>
+                                <h6 class="product-title mb-2">@item.FullName</h6>
+
+                                <div class="product-price fw-bold text-primary mb-3">
+                                    @detail.Price.ToString("N0") VNĐ
+                                </div>
+
+                                <div class="mt-auto">
+                                    <a class="btn btn-primary btn-add-cart w-100"
+                                       asp-controller="Customers"
+                                       asp-action="AddToCart"
+                                       asp-route-id="@detail.ProductDetailId">
+                                        <i class="bi bi-cart-plus me-2"></i>Thêm vào giỏ
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                }
             }
         </div>
     </section>
