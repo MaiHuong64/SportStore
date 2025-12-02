@@ -101,7 +101,92 @@
 
                         <hr class="my-4" />
 
-                        <!-- Hình ảnh -->
+                        <h5 class="mb-3 text-primary">
+                            <i class="bi bi-tag-fill me-2"></i>Biến Thể Sản Phẩm (Size, Màu, Giá)
+                        </h5>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Thêm các biến thể của sản phẩm (ví dụ: Size 42-Đen, Size 43-Trắng...). Mỗi biến thể có giá và số lượng riêng.
+                        </div>
+
+                        <div class="table-responsive mb-3">
+                            <table class="table table-bordered" id="variantsTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 100px;">Size</th>
+                                        <th style="width: 150px;">Màu Sắc</th>
+                                        <th style="width: 180px;">Giá Bán <span class="text-danger">*</span></th>
+                                        <th style="width: 120px;">Số Lượng</th>
+                                        <th style="width: 200px;">SKU (tự động)</th>
+                                        <th style="width: 80px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="variantsBody">
+                                    @if (ViewBag.SubmittedVariants != null && ((List<dynamic>)ViewBag.SubmittedVariants).Any())
+                                    {
+                                        var variantList = (List<dynamic>)ViewBag.SubmittedVariants;
+                                        for (int i = 0; i < variantList.Count; i++)
+                                        {
+                                            var v = variantList[i];
+                                            <tr class="variant-row">
+                                                <td>
+                                                    <input type="number" name="Variants[@i].Size" value="@v.Size" class="form-control form-control-sm" placeholder="42" min="0" max="255" />
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="Variants[@i].Color" value="@v.Color" class="form-control form-control-sm" placeholder="Đen, #000000" maxlength="30" />
+                                                </td>
+                                                <td>
+                                                    <input type="number" name="Variants[@i].Price" value="@v.Price" class="form-control form-control-sm" placeholder="500000" step="0.01" min="0" required />
+                                                </td>
+                                                <td>
+                                                    <input type="number" name="Variants[@i].Quantity" value="@v.Quantity" class="form-control form-control-sm" placeholder="10" min="0" />
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="Variants[@i].SKU" value="@v.SKU" class="form-control form-control-sm" placeholder="Auto" maxlength="50" />
+                                                </td>
+                                                <td class="text-center">
+                                                    <button type="button" class="btn btn-sm btn-danger remove-variant">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr class="variant-row">
+                                            <td>
+                                                <input type="number" name="Variants[0].Size" class="form-control form-control-sm" placeholder="42" min="0" max="255" />
+                                            </td>
+                                            <td>
+                                                <input type="text" name="Variants[0].Color" class="form-control form-control-sm" placeholder="Đen, #000000" maxlength="30" />
+                                            </td>
+                                            <td>
+                                                <input type="number" name="Variants[0].Price" class="form-control form-control-sm" placeholder="500000" step="0.01" min="0" required />
+                                            </td>
+                                            <td>
+                                                <input type="number" name="Variants[0].Quantity" class="form-control form-control-sm" placeholder="10" value="0" min="0" />
+                                            </td>
+                                            <td>
+                                                <input type="text" name="Variants[0].SKU" class="form-control form-control-sm" placeholder="Auto" maxlength="50" />
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm btn-danger remove-variant" disabled>
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <button type="button" class="btn btn-sm btn-success mb-4" id="addVariantBtn">
+                            <i class="bi bi-plus-circle me-1"></i>Thêm Biến Thể
+                        </button>
+
+                        <hr class="my-4" />
+
                         <h5 class="mb-3 text-primary">
                             <i class="bi bi-image me-2"></i>Hình ảnh sản phẩm
                         </h5>
@@ -189,5 +274,69 @@
             previewImg.src = '';
             preview.style.display = 'none';
         }
+
+        let variantIndex = document.querySelectorAll('.variant-row').length;
+
+        document.getElementById('addVariantBtn').addEventListener('click', function() {
+            const tbody = document.getElementById('variantsBody');
+            const newRow = `
+                <tr class="variant-row">
+                    <td>
+                        <input type="number" name="Variants[${variantIndex}].Size" class="form-control form-control-sm" placeholder="42" min="0" max="255" />
+                    </td>
+                    <td>
+                        <input type="text" name="Variants[${variantIndex}].Color" class="form-control form-control-sm" placeholder="Đen, #000000" maxlength="30" />
+                    </td>
+                    <td>
+                        <input type="number" name="Variants[${variantIndex}].Price" class="form-control form-control-sm" placeholder="500000" step="0.01" min="0" required />
+                    </td>
+                    <td>
+                        <input type="number" name="Variants[${variantIndex}].Quantity" class="form-control form-control-sm" placeholder="10" value="0" min="0" />
+                    </td>
+                    <td>
+                        <input type="text" name="Variants[${variantIndex}].SKU" class="form-control form-control-sm" placeholder="Auto" maxlength="50" />
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-danger remove-variant">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', newRow);
+            variantIndex++;
+            updateRemoveButtons();
+        });
+
+        document.getElementById('variantsBody').addEventListener('click', function(e) {
+            if (e.target.closest('.remove-variant')) {
+                e.target.closest('.variant-row').remove();
+                updateRemoveButtons();
+                reindexVariants();
+            }
+        });
+
+        function updateRemoveButtons() {
+            const rows = document.querySelectorAll('.variant-row');
+            const removeButtons = document.querySelectorAll('.remove-variant');
+            removeButtons.forEach(btn => {
+                btn.disabled = rows.length <= 1;
+            });
+        }
+
+        function reindexVariants() {
+            const rows = document.querySelectorAll('.variant-row');
+            rows.forEach((row, index) => {
+                row.querySelectorAll('input').forEach(input => {
+                    const name = input.getAttribute('name');
+                    if (name) {
+                        input.setAttribute('name', name.replace(/Variants\[\d+\]/, `Variants[${index}]`));
+                    }
+                });
+            });
+            variantIndex = rows.length;
+        }
+
+        updateRemoveButtons();
     </script>
-    }
+}

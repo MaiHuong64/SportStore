@@ -27,12 +27,16 @@
                             <th>Nhãn hàng</th>
                             <th>Danh mục</th>
                             <th>Nhà cung cấp</th>
+                            <th>Màu sắc</th>
+                            <th>Giá bán</th>
+                            <th>Tồn kho</th>
                             <th class="text-center">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var item in Model)
                         {
+                            var detail = item.ProductDetails?.FirstOrDefault();
                             <tr>
                                 <td>
                                     <span class="badge bg-secondary">@Html.DisplayFor(modelItem => item.ProductCode)</span>
@@ -63,6 +67,96 @@
                                     <span class="badge bg-success">
                                         @Html.DisplayFor(modelItem => item.Supplier.SupplierName)
                                     </span>
+                                </td>
+                                <td>
+                                    @if (item.ProductDetails != null && item.ProductDetails.Any())
+                                    {
+                                        var uniqueColors = item.ProductDetails
+                                            .Where(d => !string.IsNullOrEmpty(d.Color))
+                                            .Select(d => d.Color)
+                                            .Distinct()
+                                            .ToList();
+
+                                        if (uniqueColors.Any())
+                                        {
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @foreach (var color in uniqueColors.Take(3))
+                                                {
+                                                    var colorStyle = "";
+                                                    if (color.StartsWith("#"))
+                                                    {
+                                                        colorStyle = color;
+                                                    }
+                                                    else
+                                                    {
+                                                        var colorMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                                                        {
+                                                            {"Đen", "#000000"}, {"Black", "#000000"},
+                                                            {"Trắng", "#FFFFFF"}, {"White", "#FFFFFF"},
+                                                            {"Đỏ", "#FF0000"}, {"Red", "#FF0000"},
+                                                            {"Xanh dương", "#0000FF"}, {"Blue", "#0000FF"},
+                                                            {"Xanh lá", "#00FF00"}, {"Green", "#00FF00"},
+                                                            {"Vàng", "#FFFF00"}, {"Yellow", "#FFFF00"},
+                                                            {"Cam", "#FFA500"}, {"Orange", "#FFA500"},
+                                                            {"Hồng", "#FFC0CB"}, {"Pink", "#FFC0CB"},
+                                                            {"Tím", "#800080"}, {"Purple", "#800080"},
+                                                            {"Xám", "#808080"}, {"Gray", "#808080"}, {"Grey", "#808080"}
+                                                        };
+                                                        colorStyle = colorMap.ContainsKey(color) ? colorMap[color] : "#CCCCCC";
+                                                    }
+                                                    <span class="badge" style="background-color: @colorStyle;
+                                                          color: @(colorStyle.Equals("#FFFFFF") ? "#000" : "#fff");
+                                                          border: 1px solid #ddd;">
+                                                        @color
+                                                    </span>
+                                                }
+                                                @if (uniqueColors.Count > 3)
+                                                {
+                                                    <span class="badge bg-secondary">+@(uniqueColors.Count - 3)</span>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.ProductDetails != null && item.ProductDetails.Any())
+                                    {
+                                        var minPrice = item.ProductDetails.Min(d => d.Price);
+                                        var maxPrice = item.ProductDetails.Max(d => d.Price);
+                                        if (minPrice == maxPrice)
+                                        {
+                                            <strong class="text-primary">@minPrice.ToString("N0") đ</strong>
+                                        }
+                                        else
+                                        {
+                                            <strong class="text-primary">@minPrice.ToString("N0") - @maxPrice.ToString("N0") đ</strong>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-danger">Chưa có giá</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.ProductDetails != null && item.ProductDetails.Any())
+                                    {
+                                        var totalQty = item.ProductDetails.Sum(d => d.Quantity ?? 0);
+                                        <span class="badge @(totalQty > 0 ? "bg-success" : "bg-danger")">
+                                            @totalQty
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
                                 </td>
                                 <td class="text-center">
                                     <div class="btn-group" role="group">
