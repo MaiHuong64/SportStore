@@ -24,7 +24,9 @@ namespace SportStore.Controllers
             string? uploadFileName = null;
             if (file != null)
             {
-                uploadFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+                var extension = Path.GetExtension(file.FileName);
+                var shortGuid = Guid.NewGuid().ToString("N").Substring(0, 8);
+                uploadFileName = shortGuid + extension;
                 var path = $"wwwroot\\images\\{uploadFileName}";
                 using (var stream = new FileStream(path, FileMode.Create))
                 {
@@ -81,9 +83,16 @@ namespace SportStore.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(IFormFile Img, [Bind("ProductCode,FullName,Description,Brand,CategoryId,SupplierId,Img")] Product product)
+        public async Task<IActionResult> Create(IFormFile Img, [Bind("ProductCode,FullName,Description,Brand,CategoryId,SupplierId")] Product product)
         {
             GetData();
+
+            ModelState.Remove("Category");
+            ModelState.Remove("Supplier");
+            ModelState.Remove("ProductDetails");
+            ModelState.Remove("InvoiceDetails");
+            ModelState.Remove("Img");
+
             if (ModelState.IsValid)
             {
                 product.Img = Upload(Img);
