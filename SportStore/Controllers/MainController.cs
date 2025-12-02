@@ -44,9 +44,7 @@ namespace SportStore.Controllers
                                    .Include(p => p.ProductDetails)
                                     .Where(p => p.CategoryId == CategoryId);
 
-
-
-            return View(await products.ToListAsync());
+            return View("Index", await products.ToListAsync());
         }
 
         // GET: Main/Details/5
@@ -66,6 +64,35 @@ namespace SportStore.Controllers
             {
                 return NotFound();
             }
+
+            return View(product);
+        }
+
+        public async Task<IActionResult> ProductDetail(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Supplier)
+                .Include(p => p.ProductDetails)
+                .FirstOrDefaultAsync(m => m.ProductId == id);
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            var relatedProducts = await _context.Products
+                .Include(p => p.ProductDetails)
+                .Where(p => p.CategoryId == product.CategoryId && p.ProductId != id)
+                .Take(4)
+                .ToListAsync();
+
+            ViewBag.RelatedProducts = relatedProducts;
 
             return View(product);
         }

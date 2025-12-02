@@ -2,53 +2,93 @@
 
 <div class="container my-5">
     <div class="row">
-        <!-- Hình ảnh sản phẩm -->
         <div class="col-md-5">
             <img src="~/images/@(Model.Img ?? "default.png")"
                  class="img-fluid rounded shadow-sm"
                  alt="@Model.FullName" />
         </div>
-
-        <!-- Thông tin sản phẩm -->
         <div class="col-md-7">
             <h3>@Model.FullName</h3>
             <p class="text-muted">@Model.Brand</p>
-            <p class="fw-bold text-primary">
+            <p class="fw-bold text-primary fs-4" id="productPrice">
                 @Model.ProductDetails.FirstOrDefault()?.Price.ToString("N0") VNĐ
             </p>
 
-            <!-- Kích cỡ -->
+            @{
+                var uniqueSizes = Model.ProductDetails.Select(d => d.Size).Distinct().ToList();
+                var uniqueColors = Model.ProductDetails.Select(d => d.Color).Distinct().ToList();
+                var firstDetail = Model.ProductDetails.FirstOrDefault();
+            }
+
             <div class="mb-3">
                 <label class="form-label fw-bold">Size:</label>
-                <select class="form-select w-auto d-inline-block">
-                    @foreach (var detail in Model.ProductDetails)
+                <div class="d-flex gap-2 flex-wrap">
+                    @foreach (var size in uniqueSizes)
                     {
-                        <option>@detail.Size</option>
-                    }
-                </select>
-            </div>
-
-            <!-- Màu sắc -->
-            <div class="mb-3">
-                <label class="form-label fw-bold">Color:</label>
-                <div>
-                    @foreach (var detail in Model.ProductDetails)
-                    {
-                        <span class="badge rounded-circle me-2"
-                              style="background-color:@detail.Color; width:24px; height:24px; display:inline-block;"></span>
+                        var isFirst = size == firstDetail?.Size;
+                        <button type="button"
+                                class="btn btn-outline-primary size-btn @(isFirst ? "active" : "")"
+                                data-size="@size"
+                                style="min-width: 50px;">
+                            @size
+                        </button>
                     }
                 </div>
             </div>
 
-            <!-- Nút thêm vào giỏ -->
-            <a asp-controller="Customers"
-               asp-action="AddToCart"
-               asp-route-id="@Model.ProductDetails.FirstOrDefault()?.ProductDetailId"
-               class="btn btn-primary btn-lg mt-3">
-                <i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ
-            </a>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Màu sắc:</label>
+                <div class="d-flex gap-2 flex-wrap align-items-center">
+                    @foreach (var color in uniqueColors)
+                    {
+                        var isFirst = color == firstDetail?.Color;
+                        var colorStyle = "";
 
-            <!-- Mô tả -->
+                        if (!string.IsNullOrEmpty(color))
+                        {
+                            if (color.StartsWith("#"))
+                            {
+                                colorStyle = color;
+                            }
+                            else
+                            {
+                                var colorMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                                {
+                                    {"Đen", "#000000"}, {"Black", "#000000"},
+                                    {"Trắng", "#FFFFFF"}, {"White", "#FFFFFF"},
+                                    {"Đỏ", "#FF0000"}, {"Red", "#FF0000"},
+                                    {"Xanh dương", "#0000FF"}, {"Blue", "#0000FF"},
+                                    {"Xanh lá", "#00FF00"}, {"Green", "#00FF00"},
+                                    {"Vàng", "#FFFF00"}, {"Yellow", "#FFFF00"},
+                                    {"Cam", "#FFA500"}, {"Orange", "#FFA500"},
+                                    {"Hồng", "#FFC0CB"}, {"Pink", "#FFC0CB"},
+                                    {"Tím", "#800080"}, {"Purple", "#800080"},
+                                    {"Nâu", "#8B4513"}, {"Brown", "#8B4513"},
+                                    {"Xám", "#808080"}, {"Gray", "#808080"}, {"Grey", "#808080"}
+                                };
+
+                                colorStyle = colorMap.ContainsKey(color) ? colorMap[color] : "#CCCCCC";
+                            }
+                        }
+
+                        <button type="button"
+                                class="btn color-btn @(isFirst ? "active" : "")"
+                                data-color="@color"
+                                style="width: 36px; height: 36px; padding: 0; border: 3px solid transparent; border-radius: 50%;">
+                            <span style="display: block; width: 100%; height: 100%; background-color: @colorStyle; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #ddd;"></span>
+                        </button>
+                    }
+                </div>
+                <small class="text-muted" id="selectedColor">@firstDetail?.Color</small>
+            </div>
+
+            <button type="button"
+                    id="addToCartBtn"
+                    class="btn btn-primary btn-lg mt-3"
+                    data-product-id="@firstDetail?.ProductDetailId">
+                <i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ
+            </button>
+
             <div class="mt-4">
                 <h5>Mô tả sản phẩm</h5>
                 <p>@Model.Description</p>
@@ -56,25 +96,117 @@
         </div>
     </div>
 
-    <!-- Sản phẩm liên quan -->
-    <div class="mt-5">
-        <h4>Sản phẩm liên quan</h4>
-        <div class="row g-4 mt-2">
-            @foreach (var item in (List<SportStore.Models.Product>)ViewBag.RelatedProducts)
-            {
-                var detail = item.ProductDetails.FirstOrDefault();
-                <div class="col-lg-3 col-md-4 col-sm-6">
-                    <div class="card h-100 shadow-sm">
-                        <img src="~/images/@(item.Img ?? "default.png")" class="card-img-top" style="height:200px; object-fit:cover;" alt="@item.FullName">
-                        <div class="card-body d-flex flex-column">
-                            <h6 class="card-title mb-1 text-truncate" title="@item.FullName">@item.FullName</h6>
-                            <p class="text-muted small mb-2">@item.Brand</p>
-                            <p class="fw-bold text-primary mb-2">@detail?.Price.ToString("N0") ?? "0" VNĐ</p>
-                            <a asp-action="ProductDetail" asp-route-id="@item.ProductId" class="btn btn-outline-primary mt-auto">Xem chi tiết</a>
+    @if (ViewBag.RelatedProducts != null && ((List<SportStore.Models.Product>)ViewBag.RelatedProducts).Any())
+    {
+        <div class="mt-5">
+            <h4>Sản phẩm liên quan</h4>
+            <div class="row g-4 mt-2">
+                @foreach (var item in (List<SportStore.Models.Product>)ViewBag.RelatedProducts)
+                {
+                    var detail = item.ProductDetails.FirstOrDefault();
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="card h-100 shadow-sm">
+                            <img src="~/images/@(item.Img ?? "default.png")" class="card-img-top" style="height:200px; object-fit:cover;" alt="@item.FullName">
+                            <div class="card-body d-flex flex-column">
+                                <h6 class="card-title mb-1 text-truncate" title="@item.FullName">@item.FullName</h6>
+                                <p class="text-muted small mb-2">@item.Brand</p>
+                                <p class="fw-bold text-primary mb-2">@(detail?.Price.ToString("N0") ?? "0") VNĐ</p>
+                                <a asp-action="ProductDetail" asp-route-id="@item.ProductId" class="btn btn-outline-primary mt-auto">Xem chi tiết</a>
+                            </div>
                         </div>
                     </div>
-                </div>
-            }
+                }
+            </div>
         </div>
-    </div>
+    }
 </div>
+
+@section Scripts {
+    <script>
+        const productDetails = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.ProductDetails.Select(d => new {
+            id = d.ProductDetailId,
+            size = d.Size,
+            color = d.Color,
+            price = d.Price,
+            quantity = d.Quantity
+        })));
+
+        let selectedSize = productDetails[0]?.size;
+        let selectedColor = productDetails[0]?.color;
+
+        function updateProductInfo() {
+            const matchingDetail = productDetails.find(d =>
+                d.size == selectedSize && d.color == selectedColor
+            );
+
+            if (matchingDetail) {
+                document.getElementById('productPrice').textContent =
+                    matchingDetail.price.toLocaleString('vi-VN') + ' VNĐ';
+
+                document.getElementById('addToCartBtn').setAttribute('data-product-id', matchingDetail.id);
+
+                document.getElementById('selectedColor').textContent = selectedColor;
+
+                if (matchingDetail.quantity <= 0) {
+                    document.getElementById('addToCartBtn').disabled = true;
+                    document.getElementById('addToCartBtn').innerHTML = '<i class="bi bi-x-circle me-1"></i> Hết hàng';
+                } else {
+                    document.getElementById('addToCartBtn').disabled = false;
+                    document.getElementById('addToCartBtn').innerHTML = '<i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ';
+                }
+            }
+        }
+
+        document.querySelectorAll('.size-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                selectedSize = this.getAttribute('data-size');
+                updateProductInfo();
+            });
+        });
+
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.color-btn').forEach(b => b.style.borderColor = 'transparent');
+                this.style.borderColor = '#0d6efd';
+                selectedColor = this.getAttribute('data-color');
+                updateProductInfo();
+            });
+        });
+
+        document.getElementById('addToCartBtn').addEventListener('click', function() {
+            const productDetailId = this.getAttribute('data-product-id');
+            window.location.href = `/Customers/AddToCart/${productDetailId}`;
+        });
+
+        document.querySelector('.color-btn.active')?.style.setProperty('border-color', '#0d6efd');
+    </script>
+
+    <style>
+        .size-btn {
+            transition: all 0.3s ease;
+        }
+
+        .size-btn.active {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+
+        .color-btn {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+}
+

@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
 namespace SportStore.Models;
 
 [Table("ProductDetail")]
-[Index("Sku", Name = "UQ__ProductD__CA1ECF0DBEF8EB48", IsUnique = true)]
 public partial class ProductDetail
 {
     [Key]
@@ -19,7 +17,6 @@ public partial class ProductDetail
 
     [Column("SKU")]
     [StringLength(50)]
-    [Unicode(false)]
     public string? Sku { get; set; }
 
     [Column(TypeName = "decimal(18, 2)")]

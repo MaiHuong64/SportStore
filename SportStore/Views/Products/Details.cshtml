@@ -115,26 +115,101 @@
                 </div>
             </div>
 
-            <!-- Additional Info Card (Optional) -->
             <div class="card shadow-sm mt-3">
-                <div class="card-body">
-                    <h6 class="text-muted mb-3">
-                        <i class="fas fa-info-circle me-2"></i>Thông Tin Bổ Sung
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-tag-fill me-2"></i>Chi Tiết Sản Phẩm (Size, Màu, Giá)
                     </h6>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <small class="text-muted d-block">Mã Sản Phẩm</small>
-                            <span class="fw-semibold">@Model.ProductCode</span>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.ProductDetails != null && Model.ProductDetails.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>SKU</th>
+                                        <th>Size</th>
+                                        <th>Màu Sắc</th>
+                                        <th>Giá Bán</th>
+                                        <th>Số Lượng</th>
+                                        <th>Trạng Thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var detail in Model.ProductDetails)
+                                    {
+                                        <tr>
+                                            <td><code>@detail.Sku</code></td>
+                                            <td>
+                                                @if (detail.Size.HasValue)
+                                                {
+                                                    <span class="badge bg-info">@detail.Size</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(detail.Color))
+                                                {
+                                                    var colorStyle = "";
+                                                    if (detail.Color.StartsWith("#"))
+                                                    {
+                                                        colorStyle = detail.Color;
+                                                    }
+                                                    else
+                                                    {
+                                                        var colorMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                                                        {
+                                                            {"Đen", "#000000"}, {"Black", "#000000"},
+                                                            {"Trắng", "#FFFFFF"}, {"White", "#FFFFFF"},
+                                                            {"Đỏ", "#FF0000"}, {"Red", "#FF0000"},
+                                                            {"Xanh dương", "#0000FF"}, {"Blue", "#0000FF"}
+                                                        };
+                                                        colorStyle = colorMap.ContainsKey(detail.Color) ? colorMap[detail.Color] : "#CCCCCC";
+                                                    }
+                                                    <span class="badge" style="background-color: @colorStyle;
+                                                          color: @(colorStyle.Equals("#FFFFFF") ? "#000" : "#fff");
+                                                          border: 1px solid #ddd;">
+                                                        @detail.Color
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td><strong class="text-primary">@detail.Price.ToString("N0") đ</strong></td>
+                                            <td>
+                                                <span class="badge @(detail.Quantity > 0 ? "bg-success" : "bg-danger")">
+                                                    @detail.Quantity
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (detail.Quantity > 0)
+                                                {
+                                                    <span class="badge bg-success">Còn hàng</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Hết hàng</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="col-md-4">
-                            <small class="text-muted d-block">ID Hệ Thống</small>
-                            <span class="fw-semibold">@Model.ProductId</span>
+                    }
+                    else
+                    {
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-inbox fs-1"></i>
+                            <p class="mt-2">Chưa có thông tin chi tiết sản phẩm</p>
                         </div>
-                        <div class="col-md-4">
-                            <small class="text-muted d-block">Trạng Thái</small>
-                            <span class="badge bg-success">Đang Kinh Doanh</span>
-                        </div>
-                    </div>
+                    }
                 </div>
             </div>
         </div>

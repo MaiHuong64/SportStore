@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SportStore.Data;
 using SportStore.Models;
+using SportStore.ViewModels;
+using SportStore.Helpers;
 
 namespace SportStore.Controllers
 {
@@ -24,8 +26,10 @@ namespace SportStore.Controllers
             string? uploadFileName = null;
             if (file != null)
             {
-                uploadFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
-                var path = $"wwwroot\\images\\{uploadFileName}";
+                var extension = Path.GetExtension(file.FileName);
+                var shortGuid = Guid.NewGuid().ToString("N").Substring(0, 8);
+                uploadFileName = shortGuid + extension;
+                var path = Path.Combine("wwwroot", "images", uploadFileName);
                 using (var stream = new FileStream(path, FileMode.Create))
                 {
                     file.CopyTo(stream);
@@ -40,14 +44,15 @@ namespace SportStore.Controllers
             ViewBag.SupplierId = new SelectList(_context.Suppliers.ToList(), "SupplierId", "SupplierName");
         }
 
-        // GET: Products
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Products.Include(p => p.Category).Include(p => p.Supplier);
+            var applicationDbContext = _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Supplier)
+                .Include(p => p.ProductDetails);
             return View(await applicationDbContext.ToListAsync());
         }
 
-        // GET: Products/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             GetData();
@@ -59,6 +64,7 @@ namespace SportStore.Controllers
             var product = await _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.Supplier)
+                .Include(p => p.ProductDetails)
                 .FirstOrDefaultAsync(m => m.ProductId == id);
             if (product == null)
             {
@@ -76,25 +82,64 @@ namespace SportStore.Controllers
             return View();
         }
 
-        // POST: Products/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(IFormFile Img, [Bind("ProductCode,FullName,Description,Brand,CategoryId,SupplierId,Img")] Product product)
+        public async Task<IActionResult> Create(
+            IFormFile Img,
+            [Bind("ProductCode,FullName,Description,Brand,CategoryId,SupplierId")] Product product,
+            List<ProductVariantViewModel> Variants)
         {
             GetData();
+
+            ModelState.Remove("Category");
+            ModelState.Remove("Supplier");
+            ModelState.Remove("ProductDetails");
+            ModelState.Remove("InvoiceDetails");
+            ModelState.Remove("Img");
+
+            if (Variants == null || !Variants.Any())
+            {
+                ModelState.AddModelError("", "Vui lòng thêm ít nhất một biến thể sản phẩm");
+            }
+            else if (!Variants.Any(v => v.Price > 0))
+            {
+                ModelState.AddModelError("", "Vui lòng nhập giá cho ít nhất một biến thể");
+            }
+
             if (ModelState.IsValid)
             {
                 product.Img = Upload(Img);
                 _context.Add(product);
                 await _context.SaveChangesAsync();
+
+                foreach (var variant in Variants)
+                {
+                    if (variant.Price > 0)
+                    {
+                        var productDetail = new ProductDetail
+                        {
+                            ProductId = product.ProductId,
+                            Price = variant.Price,
+                            Quantity = variant.Quantity ?? 0,
+                            Size = variant.Size,
+                            Color = variant.Color,
+                            Sku = string.IsNullOrEmpty(variant.SKU)
+                                ? SkuHelper.GenerateSku(product.ProductCode, variant.Size, variant.Color)
+                                : variant.SKU
+                        };
+
+                        _context.ProductDetails.Add(productDetail);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewBag.SubmittedVariants = Variants;
             return View(product);
         }
 
-        // GET: Products/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             GetData();
@@ -103,7 +148,9 @@ namespace SportStore.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Products.FindAsync(id);
+            var product = await _context.Products
+                .Include(p => p.ProductDetails)
+                .FirstOrDefaultAsync(p => p.ProductId == id);
             if (product == null)
             {
                 return NotFound();
@@ -113,7 +160,11 @@ namespace SportStore.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, IFormFile? ImgFile, [Bind("ProductId,ProductCode,FullName,Description,Brand,CategoryId,SupplierId")] Product product)
+        public async Task<IActionResult> Edit(
+            int id,
+            IFormFile? ImgFile,
+            [Bind("ProductId,ProductCode,FullName,Description,Brand,CategoryId,SupplierId")] Product product,
+            List<ProductDetail> ProductDetails)
         {
             GetData();
             if (id != product.ProductId)
@@ -124,6 +175,15 @@ namespace SportStore.Controllers
             ModelState.Remove("Category");
             ModelState.Remove("Supplier");
             ModelState.Remove("ProductDetails");
+            ModelState.Remove("InvoiceDetails");
+
+            if (ProductDetails != null)
+            {
+                for (int i = 0; i < ProductDetails.Count; i++)
+                {
+                    ModelState.Remove($"ProductDetails[{i}].Product");
+                }
+            }
 
             if (ModelState.IsValid)
             {
@@ -145,6 +205,58 @@ namespace SportStore.Controllers
                     }
 
                     _context.Update(product);
+
+                    var existingDetails = await _context.ProductDetails
+                        .Where(pd => pd.ProductId == id)
+                        .ToListAsync();
+
+                    var detailsDict = existingDetails.ToDictionary(d => d.ProductDetailId);
+
+                    var submittedIds = ProductDetails?.Where(pd => pd.ProductDetailId > 0)
+                        .Select(pd => pd.ProductDetailId)
+                        .ToHashSet() ?? new HashSet<int>();
+
+                    foreach (var existingDetail in existingDetails)
+                    {
+                        if (!submittedIds.Contains(existingDetail.ProductDetailId))
+                        {
+                            _context.ProductDetails.Remove(existingDetail);
+                        }
+                    }
+
+                    if (ProductDetails != null && ProductDetails.Any())
+                    {
+                        foreach (var detail in ProductDetails)
+                        {
+                            if (detail.ProductDetailId > 0 && detailsDict.TryGetValue(detail.ProductDetailId, out var existingDetail))
+                            {
+                                existingDetail.Size = detail.Size;
+                                existingDetail.Color = detail.Color;
+                                existingDetail.Price = detail.Price;
+                                existingDetail.Quantity = detail.Quantity;
+                                existingDetail.Sku = string.IsNullOrEmpty(detail.Sku)
+                                    ? SkuHelper.GenerateSku(product.ProductCode, detail.Size, detail.Color)
+                                    : detail.Sku;
+                                _context.ProductDetails.Update(existingDetail);
+                            }
+                            else
+                            {
+                                var newDetail = new ProductDetail
+                                {
+                                    ProductId = id,
+                                    Size = detail.Size,
+                                    Color = detail.Color,
+                                    Price = detail.Price,
+                                    Quantity = detail.Quantity,
+                                    Sku = string.IsNullOrEmpty(detail.Sku)
+                                        ? SkuHelper.GenerateSku(product.ProductCode, detail.Size, detail.Color)
+                                        : detail.Sku
+                                };
+                                _context.ProductDetails.Add(newDetail);
+                            }
+                        }
+                    }
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -161,10 +273,26 @@ namespace SportStore.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var currentProduct = await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.ProductId == id);
-            if (currentProduct != null && string.IsNullOrEmpty(product.Img))
+            var currentProduct = await _context.Products
+                .Include(p => p.ProductDetails)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.ProductId == id);
+
+            if (currentProduct != null)
             {
-                product.Img = currentProduct.Img;
+                if (string.IsNullOrEmpty(product.Img))
+                {
+                    product.Img = currentProduct.Img;
+                }
+
+                if (ProductDetails == null || !ProductDetails.Any())
+                {
+                    product.ProductDetails = currentProduct.ProductDetails.ToList();
+                }
+                else
+                {
+                    product.ProductDetails = ProductDetails;
+                }
             }
 
             return View(product);
