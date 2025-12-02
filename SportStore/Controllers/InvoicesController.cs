@@ -235,8 +235,6 @@ namespace SportStore.Controllers
             ModelState.Remove("InvoiceDetails");
             ModelState.Remove("Customer");
             ModelState.Remove("Employee");
-            ModelState.Remove("InvoiceStatus");
-            ModelState.Remove("inv.InvoiceStatus");
 
             if (!ModelState.IsValid)
             {
@@ -269,7 +267,7 @@ namespace SportStore.Controllers
                 System.Diagnostics.Debug.WriteLine($"Status MỚI: {invoice.InvoiceStatus}");
 
                 existingInvoice.InvoiceDate = invoice.InvoiceDate;
-                existingInvoice.InvoiceStatus = invoice.InvoiceStatus ?? existingInvoice.InvoiceStatus;
+                existingInvoice.InvoiceStatus = invoice.InvoiceStatus;
 
                 System.Diagnostics.Debug.WriteLine($"Status SAU KHI GÁN: {existingInvoice.InvoiceStatus}");
                 foreach (var detail in invoiceDetails)
